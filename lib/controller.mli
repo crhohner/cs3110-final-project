@@ -1,0 +1,4 @@
+(* MAIN GAME LOOP, GRABS DATA FROM USER, PASSES TO MODEL, GETS STATE FROM MODEL,
+   PASSES TO VIEW, PUTS OUT VIEW*)
+
+(*main method goes here, user input goes here*)
