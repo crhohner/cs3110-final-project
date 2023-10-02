@@ -1,0 +1,4 @@
+(library
+ (name rummikaml)
+ (public_name Rummikaml)
+ (libraries str))

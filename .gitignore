@@ -27,3 +27,10 @@ setup.log
 
 # Local OPAM switch
 _opam/
+
+# temporary files
+*.swp
+*~
+\#*\#
+.DS_Store
+
