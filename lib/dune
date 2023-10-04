@@ -1,4 +1,5 @@
 (library
  (name rummikaml)
  (public_name Rummikaml)
- (libraries str))
+ (libraries str)
+ (modules_without_implementation controller model view))
