@@ -1,35 +1,43 @@
-type color (** variant representing color component of tile *)
-type tile (** variant with Joker or Num of {num : int, color : color} *)
-type player (** record with hand, tile list and name: str *)
-type game_state (**game record*)
+type color
+type tile
+type player
+type game_state
 
-(* if you wanna make a new row in move, index is len of rows (1+max index)*)
+(** A BoardType represents a Rummikaml board *)
+module type BoardType = sig
+  (*Representation type*)
+  type t
 
-(** Module that represents a rummikaml board. *)
-module type Board = sig
-  type 'a list 
-  (** adding tile at certain location on board, tile to add, row to add it to, locATION to add it to in list??*)
-  val add : tile -> int*int -> 'a list
-  (**first tuple is row, index of og loc, second is row, index of new*)
-  val move : int*int -> int*int -> 'a list
-  (* adds a tile to a new row *)
-  val new_row : tile -> int -> 'a list
-  (** checking if board is valid *)
-  val check : 'a list -> bool
-  (*check if valid board after first turn, rows add up to at least 30*)
-  val check_first: 'a list -> bool
+  val add : t -> tile -> int * int -> t
+  (**Returns a board with one tile added, given a board [board], a tile [tile],
+     a location [loc] in the form (row, index)*)
+
+  val move : t -> int * int -> int * int -> t
+  (**Returns a board with one tile moved, given a board [board], the tile to be
+     moved's current location [startLoc] in the form (row, index), and a
+     location to be moved to [endLoc] in the form (row, index)*)
+
+  val new_row : t -> tile -> t
+  (**Returns a board [board] with a tile [tile] added as a new row beneath any
+     existing rows*)
+
+  val check : t -> bool
+  (**Returns whether a board configuration is valid, given a board [board]*)
+
+  val check_first : t -> bool
+  (**Returns whether a board configuration is valid, given a board [board]*)
 end
 
-(** Module that represents a rummikaml game. *)
-module type Game = sig
-  type game_state (**in a record, player list, deck (tile list) and a board*)
-  (*moves head to back of list*)
+(** A GameType represents the whole state of a Rummikaml game *)
+module type GameType = sig
   val next_player : player list -> player list
-  (**returns winner or none*)
-  val check_win : game_state -> player option
-  val draw : game_state -> game_state
-  (**starting state of the game, takes list of player names, max 2 to start*)
-  val make : string list -> game_state
+  (**Returns a player list [players] with the previous head/player moved to the
+     end of the queue*)
 
-  
+  val check_win : game_state -> player option
+  (**Returns whether a player has one the game, returns the winner or [None]*)
+
+  val make : string list -> game_state
+  (**Returns an initial game state, before the first moves, created from a list
+     of player names*)
 end
