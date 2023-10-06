@@ -66,5 +66,5 @@ module Game = struct
     failwith "unimplemented"
 
   let check_win (state : game_state) : player option = failwith "unimplemented"
-  let make = failwith "unimplemented"
+  let make (names : string list) : game_state = failwith "unimplemented"
 end
