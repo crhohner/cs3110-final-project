@@ -21,7 +21,7 @@ module type BoardType = sig
   (**Returns a board [board] with a tile [tile] added as a new row beneath any
      existing rows*)
 
-  val check : t -> bool
+  val check : t -> int -> bool
   (**Returns whether a board configuration is valid, given a board [board]*)
 
   val check_first : t -> bool
