@@ -92,30 +92,78 @@ module Board : BoardType with type t = tile list list = struct
       && n3.color == n4.color) else false
     | Joker, Num n1, Num n2, Num n3 -> valid_row t2 t3 t4
     | Num n1, Num n2, Num n3, Joker -> valid_row t1 t2 t4
-    | Num n1, Num n2, Joker, Num n3 -> failwith "unimplemented"
-    | Num n1, Joker, Num n2, Num n3 -> failwith "unimplemented" 
-    | Joker, Joker, Num n1, Num n2 -> failwith "unimplemented" 
-    | Joker, Num n1, Joker, Num n2 -> failwith "unimplemented" 
-    | Joker, Num n1, Num n2, Joker -> failwith "unimplemented" 
-    | Num n1, Joker, Joker, Num n2 -> failwith "unimplemented" 
-    | Num n1, Num n2, Joker, Joker -> failwith "unimplemented" 
-    | Num n1, Joker, Num n2, Joker -> failwith "unimplemented" 
+    | Num n1, Num n2, Joker, Num n3 -> 
+      if n1.num == n2.num && n2.num == n3.num then check_same_num t1 t2 t4 else 
+      if n1.color == n2.color && n2.color == n3.color then 
+      (n2.num == n1.num + 1 && n3.num == n2.num + 2) else false 
+    | Num n1, Joker, Num n2, Num n3 -> 
+      if n1.num == n2.num && n2.num == n3.num then check_same_num t1 t3 t4 else
+      if n1.color == n2.color && n2.color == n3.color then
+      (n2.num == n1.num + 2 && n3.num == n2.num + 1) else false 
+    | Joker, Joker, Num n1, Num n2 | Joker, Num n1, Num n2, Joker | 
+      Num n1, Num n2, Joker, Joker -> 
+      if n1.num == n2.num then (n1.color != n2.color) else 
+      if n1.color == n2.color then (n2.num == n1.num + 1) else false 
+    | Joker, Num n1, Joker, Num n2 | Num n1, Joker, Num n2, Joker -> 
+      if n1.num == n2.num then (n1.color != n2.color) else
+      if n1.color == n2.color then (n2.num == n1.num + 2) else false 
+    | Num n1, Joker, Joker, Num n2 -> 
+      if n1.num == n2.num then (n1.color != n2.color) else 
+      if n1.color == n2.color then (n2.num == n1.num + 3) else false 
     | _ -> false
 
   (** given a tile list and color, checks that all the tiles are same color*)
   let rec check_color (c : color) (tlst : tile list) : bool = 
     match tlst with 
-    | [] -> false
+    | [] -> true
     | h :: t -> 
       match h with 
       | Joker -> check_color c t
       | Num n -> n.color == c && check_color c t
 
   (** given a list of tiles, checks that they are in consecutive off-by-one order*)
-  let rec check_row (tlst : tile list) =
+  let rec check_row (num_joker : int) (tlst : tile list) : bool =
+    if num_joker > 2 then false else 
     match tlst with 
-    | [] -> failwith "unimplemented" 
-    | h :: t -> failwith "unimplemented"
+    | [] -> true
+    | _ :: [] -> true
+    | h1 :: h2 :: [] -> 
+      (match h1, h2 with
+      | Num n1, Num n2 -> if n2.num == n1.num + 1 then true else false
+      | Num n, Joker | Joker, Num n -> check_row (num_joker + 1) [] 
+      | Joker, Joker -> check_row (num_joker + 2) [])
+    | h1 :: h2 :: h3 :: [] -> 
+      (match h1, h2, h3 with
+      | Num n1, Num n2, Num n3 -> check_same_color h1 h2 h3
+      | Num n1, Joker, Num n2 -> if num_joker + 1 > 2 then false else
+        if n2.num == n1.num + 2 then true else false
+      | Num n1, Num n2, Joker | Joker, Num n1, Num n2-> 
+        if num_joker + 1 > 2 then false else
+        if n2.num == n1.num + 1 then true else false
+      | Joker, Joker, Num n | Joker, Num n, Joker | Num n, Joker, Joker -> 
+        check_row (num_joker + 2) []
+      | _ -> false)
+    | h1 :: h2 :: h3 :: h4 :: t -> 
+      match h1, h2, h3, h4 with
+      | Joker, Joker, Joker, _ -> false
+      | Joker, Joker, Num n, _ -> check_row (num_joker + 2) (h3 :: h4 :: t)
+      | Joker, Num n1, Num n2, _ -> if n2.num == n1.num + 1 then 
+        check_row (num_joker + 1) (h3 :: h4 :: t) else false 
+      | Num n1, Joker, Num n2, _ -> if n2.num == n1.num + 2 then
+        check_row (num_joker + 1) (h3 :: h4 :: t) else false 
+      | Num n1, Num n2, Joker, Num n3 -> if n2.num == n1.num + 1 
+        && n3.num == n2.num + 2 then check_row (num_joker + 1) (h4 :: t) 
+        else false
+      | Num n1, Num n2, Joker, Joker -> if n2.num == n1.num + 1 then 
+        check_row (num_joker) (h3 :: h4 :: t) else false 
+      | Num n1, Joker, Joker, Num n3 -> if n3.num == n1.num + 3 then 
+        check_row (num_joker + 2) (h4 :: t) else false
+      | Joker, Num n1, Joker, Num n2 -> if n2.num == n1.num + 2 then 
+        check_row (num_joker + 2) (h4 :: t) else false 
+      | Num n, Joker, Joker, Joker | Joker, Num n, Joker, Joker -> false
+      | Num n1, Num n2, Num n3, _ -> if check_same_color h1 h2 h3 then
+        check_row (num_joker) (h4 :: t) else false
+      
 
   (** finds the color of the first non-Joker tile or returns false*)
   let get_color (t1 : tile) (t2 : tile) (t3 : tile) : bool * color =
@@ -142,7 +190,7 @@ module Board : BoardType with type t = tile list list = struct
       | h1 :: h2 :: h3 :: tlist -> let c = get_color h1 h2 h3 in 
         match c with
         | (b, col) -> if b then let l = h1 :: h2 :: h3 :: tlist in 
-          (if check_color col l then check_row l && check t
+          (if check_color col l then check_row 0 l && check t
           else false) else false
 
   let check_first (board : tile list list) : bool = failwith "unimplemented"
