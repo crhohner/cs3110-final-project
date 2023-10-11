@@ -28,6 +28,8 @@ module type BoardType = sig
   (**Returns whether a board configuration is valid, given a board [board]*)
 end
 
+module Board : BoardType
+
 (** A GameType represents the whole state of a Rummikaml game *)
 module type GameType = sig
   val next_player : player list -> player list
@@ -41,3 +43,5 @@ module type GameType = sig
   (**Returns an initial game state, before the first moves, created from a list
      of player names*)
 end
+
+module Game : GameType
