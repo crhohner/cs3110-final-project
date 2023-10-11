@@ -256,8 +256,69 @@ end
 (** A Game represents the whole state of a Rummikaml game based on tiles *)
 module Game : GameType = struct
   let next_player (players : player list) : player list =
-    failwith "unimplemented"
+    match players with
+    | h :: t -> t @ [ h ]
+    | _ -> []
 
-  let check_win (state : game_state) : player option = failwith "unimplemented"
-  let make (names : string list) : game_state = failwith "unimplemented"
+  (* Function checks if a player has won (no more tiles) - currently iterates
+     through entire list of players rather than simply checking the current
+     player. Depends on how often we run check_win *)
+  let rec check_win (state : game_state) : player option =
+    let rec empty_hand (lst : player list) : player option =
+      match lst with
+      | [] -> None
+      | h :: t -> if h.hand = [] then Some h else empty_hand t
+    in
+    empty_hand state.players
+
+  (* Helper for make function used to create a complete deck of tiles *)
+  let rec create_deck (n : int) (lst : tile list) : tile list =
+    if n = 0 then [ Joker; Joker ]
+    else
+      let l =
+        [
+          Num { num = n; color = Yellow };
+          Num { num = n; color = Red };
+          Num { num = n; color = Blue };
+          Num { num = n; color = Black };
+        ]
+      in
+      create_deck (n - 1) lst @ l @ l
+
+  (** Helper for subset function that removes nth element in given list -
+      returns tuple of element removed and modified list *)
+  let rec pop (n : int) (lst : tile list) : tile * tile list =
+    if n = 0 then (List.hd lst, List.tl lst)
+    else
+      let r = pop (n - 1) (List.tl lst) in
+      (fst r, List.hd lst :: snd r)
+
+  (** Helper for distribute_hand function that randomly takes n elements from
+      given list - returns tuple of n random elements and modified list *)
+  let rec subset (n : int) (lst : tile list) : tile list * tile list =
+    if n = 0 then ([], lst)
+    else
+      let popped = pop (Random.int (List.length lst)) lst in
+      let lsts = subset (n - 1) (snd popped) in
+      (fst popped :: fst lsts, snd lsts)
+
+  (** Helper for make function that distributes 14 random starting tiles from
+      the deck to each player - returns tuple of player list with hands and
+      remaining deck *)
+  let rec distribute_hand (players : player list) (deck : tile list) :
+      player list * tile list =
+    if players = [] then ([], deck)
+    else
+      let s = subset 14 deck in
+      let player = List.hd players in
+      let remaining = List.tl players in
+      ( { player with hand = fst s } :: fst (distribute_hand remaining (snd s)),
+        snd (distribute_hand remaining (snd s)) )
+
+  (** Function that takes in names of players and creates initial game_state.
+      Note board is empty. *)
+  let make (names : string list) : game_state =
+    let p = List.map (fun n -> { hand = []; name = n }) names in
+    let dis = distribute_hand p (create_deck 13 []) in
+    { players = fst dis; board = []; deck = snd dis }
 end
