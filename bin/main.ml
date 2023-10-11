@@ -63,8 +63,8 @@ let _ =
 
 let _ = print_endline "welcome to rummikaml! \n"
 let _ = print_endline "let's get going. how many players?"
-let _ = print_newline ()
 let player_count = get_int_input ()
+let _ = print_newline ()
 let player_names = get_player_names player_count
 let first = choose_first_player player_names
 let player_names = set_first_player player_names first
