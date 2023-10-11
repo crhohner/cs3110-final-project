@@ -9,6 +9,8 @@ module type ViewType = sig
   val string_of_tile : tile -> string
 end
 
+(**An implementation of ViewType which prints information about the game to the
+   CLI*)
 module CLIPrinter (Game : GameType) : ViewType = struct
   let show_board (state : game_state) : unit = failwith "u"
   let rec clear (lines : int) : unit = failwith "u"
