@@ -54,12 +54,12 @@ let _ =
     \ [I]    /  |  /`       '.\n\
     \ [K]   |   '-'    /      \\\n\
     \ [A]    \\         |       |\\\n\
-    \ [M]     \\    /   \\      /\\|\n\
-    \ [L]       \\  /'----`\\   /\n\
-    \           |||        \\ |\n\
-    \           ((|        ((|\n\
-    \           |||        |||\n\
-    \          //_(       //_("
+    \ [M]     \\     /   \\      /\\|\n\
+    \ [L]      \\  /'----`\\   /\n\
+    \          |||        \\ |\n\
+    \          ((|        ((|\n\
+    \          |||        |||\n\
+    \         //_(       //_("
 
 let _ = print_endline "welcome to rummikaml! \n"
 let _ = print_endline "let's get going. how many players?"
