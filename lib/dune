@@ -2,4 +2,4 @@
  (name rummikaml)
  (public_name Rummikaml)
  (libraries str)
- (modules_without_implementation controller view))
+ (modules_without_implementation controller))

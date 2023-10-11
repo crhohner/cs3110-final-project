@@ -1,6 +1,7 @@
 open Rummikaml
 open Model
 open Random
+open View
 
 (*input processing / repeated stuff goes here *)
 
@@ -28,19 +29,6 @@ let rec get_player_names n : string list =
     let _ = print_newline () in
     name :: get_player_names (n - 1)
 
-(** Moves the head of a list of strings [names] to match an input string [name].
-    Raises Failure player [name] not found if [name] is not in [names].*)
-let rec set_first_player (names : string list) (name : string) : string list =
-  match names with
-  | h :: t -> if h = name then names else set_first_player (t @ [ h ]) name
-  | [] -> raise (Failure ("player " ^ name ^ "not found"))
-
-(** Returns a random string from a list of strings [names]. Used to randomly
-    select which player will go first. *)
-let choose_first_player (names : string list) =
-  let _ = Random.self_init () in
-  List.nth names (Random.int List.(length names))
-
 (*game starts here*)
 
 let _ = print_newline ()
@@ -66,7 +54,15 @@ let _ = print_endline "let's get going. how many players?"
 let player_count = get_int_input ()
 let _ = print_newline ()
 let player_names = get_player_names player_count
-let first = choose_first_player player_names
-let player_names = set_first_player player_names first
 let game = Game.make player_names
-let _ = print_endline (first ^ " goes first! let's play!")
+
+module Printer = CLIPrinter (Game)
+
+let _ =
+  print_endline
+    ((let active = Game.active_player game in
+      active.name)
+    ^ " goes first! let's play!")
+
+(*can uncomment below to see the first player's hand for funsies*)
+(*let _ = game |> Game.active_player |> Printer.show_hand*)

@@ -1,7 +1,26 @@
-type color
-type tile
-type player
-type game_state
+type color =
+  | Yellow
+  | Red
+  | Blue
+  | Black
+
+type tile =
+  | Joker
+  | Num of {
+      num : int;
+      color : color;
+    }
+
+type player = {
+  hand : tile list;
+  name : string;
+}
+
+type game_state = {
+  players : player list;
+  board : tile list list;
+  deck : tile list;
+}
 
 (** A BoardType represents a Rummikaml board *)
 module type BoardType = sig
@@ -32,16 +51,19 @@ module Board : BoardType
 
 (** A GameType represents the whole state of a Rummikaml game *)
 module type GameType = sig
-  val next_player : player list -> player list
-  (**Returns a player list [players] with the previous head/player moved to the
-     end of the queue*)
+  val next_player : game_state -> game_state
+  (**Returns a game state [state] with the previous head/player moved to the end
+     of the queue in [state.players] *)
 
   val check_win : game_state -> player option
   (**Returns whether a player has one the game, returns the winner or [None]*)
 
   val make : string list -> game_state
-  (**Returns an initial game state, before the first moves, created from a list
-     of player names*)
+  (**Returns an initial game state before the first move, created from a list of
+     player names*)
+
+  val active_player : game_state -> player
+  (**Returns the current player in a game [state]*)
 end
 
 module Game : GameType

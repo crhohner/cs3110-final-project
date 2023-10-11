@@ -248,17 +248,21 @@ end
 
 (** A GameType represents the whole state of a Rummikaml game *)
 module type GameType = sig
-  val next_player : player list -> player list
+  val next_player : game_state -> game_state
   val check_win : game_state -> player option
   val make : string list -> game_state
+  val active_player : game_state -> player
 end
 
 (** A Game represents the whole state of a Rummikaml game based on tiles *)
 module Game : GameType = struct
-  let next_player (players : player list) : player list =
-    match players with
-    | h :: t -> t @ [ h ]
-    | _ -> []
+  let next_player (state : game_state) : game_state =
+    let next_lst =
+      match state.players with
+      | h :: t -> t @ [ h ]
+      | _ -> []
+    in
+    { state with players = next_lst }
 
   (* Function checks if a player has won (no more tiles) - currently iterates
      through entire list of players rather than simply checking the current
@@ -298,6 +302,7 @@ module Game : GameType = struct
   let rec subset (n : int) (lst : tile list) : tile list * tile list =
     if n = 0 then ([], lst)
     else
+      let _ = Random.self_init () in
       let popped = pop (Random.int (List.length lst)) lst in
       let lsts = subset (n - 1) (snd popped) in
       (fst popped :: fst lsts, snd lsts)
@@ -315,10 +320,24 @@ module Game : GameType = struct
       ( { player with hand = fst s } :: fst (distribute_hand remaining (snd s)),
         snd (distribute_hand remaining (snd s)) )
 
+  (** Returns a game state [state] with a randomly selected player as the head
+      of the player queue, [state.players]*)
+  let choose_first_player (state : game_state) =
+    let _ = Random.self_init () in
+    let idx = Random.int (List.length state.players) in
+    let rec set_first (n : int) (players : player list) : player list =
+      match players with
+      | h :: t -> if n = 0 then players else set_first (n - 1) (t @ [ h ])
+      | [] -> raise (Failure "player not found")
+    in
+    { state with players = set_first idx state.players }
+
   (** Function that takes in names of players and creates initial game_state.
       Note board is empty. *)
   let make (names : string list) : game_state =
     let p = List.map (fun n -> { hand = []; name = n }) names in
     let dis = distribute_hand p (create_deck 13 []) in
-    { players = fst dis; board = []; deck = snd dis }
+    choose_first_player { players = fst dis; board = []; deck = snd dis }
+
+  let active_player (state : game_state) = List.hd state.players
 end
