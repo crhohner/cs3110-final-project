@@ -7,7 +7,7 @@ let joker = Joker
 let t1 = Num { color = Yellow; num = 2 }
 let t2 = Num { color = Black; num = 13 }
 
-module Printer = CLIPrinter (Game)
+module Printer = CLIPrinter
 
 let board_tests = [ ("testing testy test" >:: fun _ -> assert_equal [] []) ]
 let game_tests = []
