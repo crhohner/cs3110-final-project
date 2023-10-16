@@ -25,7 +25,7 @@ type game_state = {
 (** A BoardType represents a Rummikaml board *)
 module type BoardType = sig
   (*Representation type*)
-  type t
+  type t = tile list list
 
   val add : t -> tile -> int * int -> t
   (**Returns a board with one tile added, given a board [board], a tile [tile],
@@ -40,7 +40,7 @@ module type BoardType = sig
   (**Returns a board [board] with a tile [tile] added as a new row beneath any
      existing rows*)
 
-  val check : t -> int -> bool
+  val check : t -> bool
   (**Returns whether a board configuration is valid, given a board [board]*)
 
   val check_first : t -> bool
