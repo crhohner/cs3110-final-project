@@ -5,13 +5,25 @@ open View
 
 (*input processing / repeated stuff goes here *)
 
-(** Returns the first valid integer input from the command line. Will keep
-    asking for a valid integer until one is given. *)
-let rec get_int_input () : int =
-  try read_int ()
-  with Failure s ->
-    let _ = print_endline "please enter a valid integer" in
-    get_int_input ()
+(** Returns the first input from the command line that for which [p] is true.
+    Will ask for a valid value by printing [msg] on inavlid input. *)
+let rec get_input p msg =
+  let input = read_line () in
+  if p input then input
+  else
+    let _ = print_endline msg in
+    get_input p msg
+
+(** Returns the first valid integer input from the command line. Will ask for a
+    valid integer if input is invalid. *)
+let get_int () =
+  int_of_string
+    (get_input
+       (fun x ->
+         match int_of_string x with
+         | exception Failure s -> false
+         | _ -> true)
+       "enter a valid integer input")
 
 (** Returns a list of [n] player names given from the command line. Will
     substitute empty names with "player[n]" for the [n]th player. *)
@@ -49,14 +61,15 @@ let _ =
     \          |||        |||\n\
     \         //_(       //_("
 
+let newlines = 20
 let _ = print_endline "welcome to rummikaml! \n"
 let _ = print_endline "let's get going. how many players?"
-let player_count = get_int_input ()
+let player_count = get_int ()
 let _ = print_newline ()
 let player_names = get_player_names player_count
 let game = Game.make player_names
 
-module Printer = CLIPrinter (Game)
+module Printer = CLIPrinter
 
 let _ =
   print_endline
@@ -64,5 +77,7 @@ let _ =
       active.name)
     ^ " goes first! let's play!")
 
+let _ = print_newline ()
+
 (*can uncomment below to see the first player's hand for funsies*)
-(*let _ = game |> Game.active_player |> Printer.show_hand*)
+let _ = CLIPrinter.show_turn game
