@@ -22,6 +22,28 @@ type game_state = {
   deck : tile list;
 }
 
+let rec insert (ele : 'a) (lst : 'a list) (i : int) : 'a list =
+  if i > List.length lst || i < 0 then raise (Invalid_argument "invalid loc")
+  else
+    match lst with
+    | [] -> [ ele ]
+    | h :: t when i > 0 -> h :: insert ele t (i - 1)
+    | _ -> ele :: lst
+
+let rec replace (ele : 'a) (lst : 'a list) (i : int) : 'a list =
+  match lst with
+  | [] -> raise (Invalid_argument "invalid index")
+  | h :: t when i > 0 -> h :: replace ele t (i - 1)
+  | _ :: t -> ele :: t
+
+let rec remove (i : int) (lst : 'a list) : 'a * 'a list =
+  match lst with
+  | [] -> raise (Invalid_argument "invalid index")
+  | h :: t when i > 0 ->
+      let next = remove (i - 1) t in
+      (fst next, h :: snd next)
+  | h :: t -> (h, t)
+
 (** A BoardType represents a Rummikaml board *)
 module type BoardType = sig
   type t = tile list list
@@ -38,44 +60,18 @@ module Board : BoardType with type t = tile list list = struct
   (*every row is a list of tiles*)
   type t = tile list list
 
-  (** Helper for add, puts tile into row at index i, 
-      if i > lst length then puts at end of list*)
-  let rec put_tile (ele : 'a) (lst : 'a list) (i : int) : 'a list =
-    match lst with 
-    | [] -> [ele] 
-    | h :: t when i > 0 -> h :: put_tile ele t (i-1) 
-    | _ -> ele :: lst
-
-  (** Helper for add, replaces element at index i with [ele] in [lst]*)
-  let rec put_row (ele : 'a) (lst : 'a list) (i : int) : 'a list  =
-    match lst with 
-    | [] -> [ele] 
-    | h :: t when i > 0 -> h :: put_row ele t (i-1) 
-    | _ :: t -> ele :: t 
-
   let add (board : tile list list) (tile : tile) (loc : int * int) :
       tile list list =
-    let row = List.nth board (fst loc) in 
-    let new_row = put_tile tile row (snd loc) in 
-    put_row new_row board (fst loc)
-
-  (** Helper for move, removes tile at location [i] and returns that 
-      tile*)
-  let rec remove (i : int) (lst : 'a list) : 'a option * 'a list = 
-    match lst with 
-    | [] -> (None, [])
-    | h :: t when i > 0 -> let next = remove (i-1) t in
-      (fst next, h :: (snd next))
-    | h :: t -> (Some h, t)
+    let row = List.nth board (fst loc) in
+    let new_row = insert tile row (snd loc) in
+    replace new_row board (fst loc)
 
   let move (board : tile list list) (startLoc : int * int) (endLoc : int * int)
       : tile list list =
-      let row = List.nth board (fst startLoc) in 
-      let (tile, new_row) = remove (snd startLoc) row in 
-      let mid_board = put_row new_row board (fst startLoc) in 
-      match tile with 
-      | None -> board
-      | Some t -> add mid_board t endLoc 
+    let row = List.nth board (fst startLoc) in
+    let tile, new_row = remove (snd startLoc) row in
+    let mid_board = replace new_row board (fst startLoc) in
+    add mid_board tile endLoc
 
   let new_row (board : tile list list) (tile : tile) : tile list list =
     failwith "unimplemented"
@@ -94,36 +90,42 @@ module Board : BoardType with type t = tile list list = struct
     match tlst with
     | [] -> true
     | h :: t -> (
-      match h with
-      | Joker -> check_num n t 
-      | Num n1 -> n1.num == n && check_num n t)
+        match h with
+        | Joker -> check_num n t
+        | Num n1 -> n1.num == n && check_num n t)
 
-  (** given list of tiles of the same number, checks if their colors are different*)
+  (** given list of tiles of the same number, checks if their colors are
+      different*)
   let check_rowcolors (tlst : tile list) : bool =
-    match tlst with 
-    | [ t1; t2; t3 ] -> 
-      (match (t1, t2, t3) with
-      | Num n1, Num n2, Num n3 ->
-          n1.color != n2.color && n2.color != n3.color && n1.color != n3.color
-      | Joker, Num n1, Num n2 | Num n1, Joker, Num n2 | Num n1, Num n2, Joker ->
-          n1.color != n2.color
-      | _ -> true)
-    | [ t1; t2; t3; t4 ] -> 
-      (match (t1, t2, t3, t4) with 
-      | Num n1, Num n2, Num n3, Num n4 -> 
-          n1.color != n2.color && n2.color != n3.color && n3.color != n4.color
-          && n4.color != n1.color && n3.color != n1.color && n4.color != n2.color
-      | Num n1, Num n2, Num n3, Joker | Num n1, Num n2, Joker, Num n3 | 
-        Num n1, Joker, Num n2, Num n3 | Joker, Num n1, Num n2, Num n3 -> 
-          n1.color != n2.color && n2.color != n3.color && n1.color != n3.color
-      | Num n1, Num n2, Joker, Joker | Num n1, Joker, Joker, Num n2 | 
-        Joker, Joker, Num n1, Num n2 | Num n1, Joker, Num n2, Joker |
-        Joker, Num n1, Joker, Num n2 | Joker, Num n1, Num n2, Joker -> 
-          n1.color != n2.color
-      | _ -> false)
+    match tlst with
+    | [ t1; t2; t3 ] -> (
+        match (t1, t2, t3) with
+        | Num n1, Num n2, Num n3 ->
+            n1.color != n2.color && n2.color != n3.color && n1.color != n3.color
+        | Joker, Num n1, Num n2 | Num n1, Joker, Num n2 | Num n1, Num n2, Joker
+          -> n1.color != n2.color
+        | _ -> true)
+    | [ t1; t2; t3; t4 ] -> (
+        match (t1, t2, t3, t4) with
+        | Num n1, Num n2, Num n3, Num n4 ->
+            n1.color != n2.color && n2.color != n3.color && n3.color != n4.color
+            && n4.color != n1.color && n3.color != n1.color
+            && n4.color != n2.color
+        | Num n1, Num n2, Num n3, Joker
+        | Num n1, Num n2, Joker, Num n3
+        | Num n1, Joker, Num n2, Num n3
+        | Joker, Num n1, Num n2, Num n3 ->
+            n1.color != n2.color && n2.color != n3.color && n1.color != n3.color
+        | Num n1, Num n2, Joker, Joker
+        | Num n1, Joker, Joker, Num n2
+        | Joker, Joker, Num n1, Num n2
+        | Num n1, Joker, Num n2, Joker
+        | Joker, Num n1, Joker, Num n2
+        | Joker, Num n1, Num n2, Joker -> n1.color != n2.color
+        | _ -> false)
     | _ -> false
 
-  (** given a list of tiles of the same color, checks that they are in 
+  (** given a list of tiles of the same color, checks that they are in
       consecutive off-by-one order*)
   let rec check_rownums (tlst : tile list) : bool =
     match tlst with
@@ -131,27 +133,22 @@ module Board : BoardType with type t = tile list list = struct
     | _ :: [] -> true
     | [ h1; h2 ] -> (
         match (h1, h2) with
-        | Num n1, Num n2 ->
-            n2.num == n1.num + 1 
+        | Num n1, Num n2 -> n2.num == n1.num + 1
         | _ -> true)
     | [ h1; h2; h3 ] -> (
         match (h1, h2, h3) with
         | Num n1, Num n2, Num n3 -> true
-        | Num n1, Joker, Num n2 ->
-            n2.num == n1.num + 2
-        | Num n1, Num n2, Joker | Joker, Num n1, Num n2 ->
-            n2.num == n1.num + 1
+        | Num n1, Joker, Num n2 -> n2.num == n1.num + 2
+        | Num n1, Num n2, Joker | Joker, Num n1, Num n2 -> n2.num == n1.num + 1
         | _ -> true)
     | h1 :: h2 :: h3 :: h4 :: t -> (
         match (h1, h2, h3, h4) with
         | Joker, Joker, Num _, _ -> check_rownums (h3 :: h4 :: t)
         | Joker, Num n1, Num n2, _ ->
-            if n2.num == n1.num + 1 then
-              check_rownums (h3 :: h4 :: t)
+            if n2.num == n1.num + 1 then check_rownums (h3 :: h4 :: t)
             else false
         | Num n1, Joker, Num n2, _ ->
-            if n2.num == n1.num + 2 then
-              check_rownums (h3 :: h4 :: t)
+            if n2.num == n1.num + 2 then check_rownums (h3 :: h4 :: t)
             else false
         | Num n1, Num n2, Joker, Num n3 ->
             if n2.num == n1.num + 1 && n3.num == n2.num + 2 then
@@ -161,17 +158,14 @@ module Board : BoardType with type t = tile list list = struct
             if n2.num == n1.num + 1 then check_rownums (h3 :: h4 :: t)
             else false
         | Num n1, Joker, Joker, Num n3 ->
-            if n3.num == n1.num + 3 then check_rownums (h4 :: t)
-            else false
+            if n3.num == n1.num + 3 then check_rownums (h4 :: t) else false
         | Joker, Num n1, Joker, Num n2 ->
-            if n2.num == n1.num + 2 then check_rownums (h4 :: t)
-            else false
-        | Num n1, Num n2, Num n3, _ ->
-          check_rownums (h4 :: t)
-        | _ -> false )
+            if n2.num == n1.num + 2 then check_rownums (h4 :: t) else false
+        | Num n1, Num n2, Num n3, _ -> check_rownums (h4 :: t)
+        | _ -> false)
 
-  (** finds the color of the first non-Joker tile, returns: (false, Yellow) 
-      if no color found, otherwise (true, color)*)
+  (** finds the color of the first non-Joker tile, returns: (false, Yellow) if
+      no color found, otherwise (true, color)*)
   let get_color (t1 : tile) (t2 : tile) (t3 : tile) : bool * color =
     match t1 with
     | Joker -> (
@@ -183,12 +177,12 @@ module Board : BoardType with type t = tile list list = struct
         | Num n2 -> (true, n2.color))
     | Num n1 -> (true, n1.color)
 
-  (** finds the number of the first non-Joker tile, returns: (false, 0)
-      if no number found, otherwise (true, num)*)
-  let get_num (t1 : tile) (t2: tile) (t3 : tile) : bool * int =
+  (** finds the number of the first non-Joker tile, returns: (false, 0) if no
+      number found, otherwise (true, num)*)
+  let get_num (t1 : tile) (t2 : tile) (t3 : tile) : bool * int =
     match t1 with
     | Joker -> (
-        match t2 with 
+        match t2 with
         | Joker -> (
             match t3 with
             | Joker -> (false, 0)
@@ -196,66 +190,64 @@ module Board : BoardType with type t = tile list list = struct
         | Num n2 -> (true, n2.num))
     | Num n1 -> (true, n1.num)
 
-
   (** checks if the list of tiles is valid given a color and number*)
   let rec valid_row (c : color) (n : int) (tlst : tile list) : bool =
-    if check_color c tlst then check_rownums tlst else 
-    if check_num n tlst then check_rowcolors tlst else
-    false
+    if check_color c tlst then check_rownums tlst
+    else if check_num n tlst then check_rowcolors tlst
+    else false
 
   let rec check (board : tile list list) : bool =
     match board with
     | [] -> true
     | h :: t -> (
-        if List.length h < 3 && List.length h != 0 then false else
-        match h with
-        | [] -> true
-        | _ :: [] -> false
-        | [ _; _ ] -> false
-        | [ h1; h2; h3 ] -> (
-          let l = [h1; h2; h3] in 
-          let c = get_color h1 h2 h3 in 
-          let n = get_num h1 h2 h3 in 
-          match (c, n) with
-          | (b1, col), (b2, number) -> 
-              (if b1 && b2 then valid_row col number l && check t
-              else false))
-        | [ h1; h2; h3; h4 ] -> (
-            let l = [h1; h2; h3; h4] in 
-            let c = get_color h1 h2 h3 in 
-            let n = get_num h1 h2 h3 in 
-            match (c, n) with
-            | (b1, col), (b2, number) -> 
-                (if b1 && b2 then valid_row col number l && check t
-                else false))
-        | h1 :: h2 :: h3 :: tlist -> (
-            let c = get_color h1 h2 h3 in
-            match c with
-            | b, col ->
-                if b then
-                  let l = h1 :: h2 :: h3 :: tlist in
-                  if check_color col l then check_rownums l && check t
-                  else false
-                else false))
+        if List.length h < 3 && List.length h != 0 then false
+        else
+          match h with
+          | [] -> true
+          | _ :: [] -> false
+          | [ _; _ ] -> false
+          | [ h1; h2; h3 ] -> (
+              let l = [ h1; h2; h3 ] in
+              let c = get_color h1 h2 h3 in
+              let n = get_num h1 h2 h3 in
+              match (c, n) with
+              | (b1, col), (b2, number) ->
+                  if b1 && b2 then valid_row col number l && check t else false)
+          | [ h1; h2; h3; h4 ] -> (
+              let l = [ h1; h2; h3; h4 ] in
+              let c = get_color h1 h2 h3 in
+              let n = get_num h1 h2 h3 in
+              match (c, n) with
+              | (b1, col), (b2, number) ->
+                  if b1 && b2 then valid_row col number l && check t else false)
+          | h1 :: h2 :: h3 :: tlist -> (
+              let c = get_color h1 h2 h3 in
+              match c with
+              | b, col ->
+                  if b then
+                    let l = h1 :: h2 :: h3 :: tlist in
+                    if check_color col l then check_rownums l && check t
+                    else false
+                  else false))
 
   (** Helper for check_first, returns sum of tiles in row*)
   let rec count_tiles (lst : tile list) : int =
-    match lst with 
+    match lst with
     | [] -> 0
-    | h :: t -> 
-      match h with 
-      | Num n -> n.num + count_tiles t
-      | Joker -> 10 + count_tiles t
+    | h :: t -> (
+        match h with
+        | Num n -> n.num + count_tiles t
+        | Joker -> 10 + count_tiles t)
 
-  let rec check_first (board : tile list list) : bool = 
-    if check board then 
-      let rec tiles b = (
-        match b with 
+  let rec check_first (board : tile list list) : bool =
+    if check board then
+      let rec tiles b =
+        match b with
         | [] -> 0
-        | h :: t -> count_tiles h + tiles t) in
+        | h :: t -> count_tiles h + tiles t
+      in
       tiles board >= 30
     else false
-
 end
 
 (** A GameType represents the whole state of a Rummikaml game *)

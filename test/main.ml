@@ -7,73 +7,150 @@ let joker = Joker
 let t1 = Num { color = Yellow; num = 2 }
 let t2 = Num { color = Black; num = 13 }
 
-let s1 = [Num{color = Red; num = 5};
-Num{color = Red; num = 6}; Num{color = Red; num = 7}]
+let row1 =
+  [
+    Num { color = Red; num = 5 };
+    Num { color = Red; num = 6 };
+    Num { color = Red; num = 7 };
+  ]
 
-let board1  = [[t1; t2]]
+let row2 =
+  [ Num { color = Black; num = 5 }; Joker; Num { color = Yellow; num = 7 } ]
 
-let board2 = [[Num{color = Red; num = 5}]; s1; 
-[Num{color = Yellow; num = 11}; Num{color = Yellow; num = 12}; 
-Num{color = Yellow; num =13}]]
+let board1 = [ [ t1; t2 ] ]
 
-let board3 = [[Num{color = Blue; num = 7}; Num{color = Red; num = 7}; 
-Num{color = Yellow; num = 7}]; [Num{color = Yellow; num = 2}]; s1]
+let board2 =
+  [
+    [ Num { color = Red; num = 5 } ];
+    row1;
+    [
+      Num { color = Yellow; num = 11 };
+      Num { color = Yellow; num = 12 };
+      Num { color = Yellow; num = 13 };
+    ];
+  ]
 
-let board4 = [[Num{color = Yellow; num = 1}; Num{color = Yellow; num = 2}; 
-Num{color = Yellow; num = 3}]; [Num{color = Yellow; num = 10}; 
-Num{color = Yellow; num = 11}; Num{color = Yellow; num = 12}; 
-Num{color = Yellow; num = 13}]]
+let board3 =
+  [
+    [
+      Num { color = Blue; num = 7 };
+      Num { color = Red; num = 7 };
+      Num { color = Yellow; num = 7 };
+    ];
+    [ Num { color = Yellow; num = 2 } ];
+    row1;
+  ]
 
-let board5 = [[Num{color = Blue; num = 2}; Num{color = Yellow; num = 2};
-Num{color = Red; num = 2}]; [Num{color = Red; num = 12}; 
-Num{color = Blue; num = 12}; Num{color = Black; num = 12}]]
+let board4 =
+  [
+    [
+      Num { color = Yellow; num = 1 };
+      Num { color = Yellow; num = 2 };
+      Num { color = Yellow; num = 3 };
+    ];
+    [
+      Num { color = Yellow; num = 10 };
+      Num { color = Yellow; num = 11 };
+      Num { color = Yellow; num = 12 };
+      Num { color = Yellow; num = 13 };
+    ];
+  ]
 
-let board6 = [[Num{color = Red; num = 8}; Num{color = Red; num = 9}; Joker]; 
-[Num{color = Blue; num = 10}; Num{color = Red; num = 10}; 
-Num{color = Yellow; num = 10}]]
+let board5 =
+  [
+    [
+      Num { color = Blue; num = 2 };
+      Num { color = Yellow; num = 2 };
+      Num { color = Red; num = 2 };
+    ];
+    [
+      Num { color = Red; num = 12 };
+      Num { color = Blue; num = 12 };
+      Num { color = Black; num = 12 };
+    ];
+  ]
 
-let board7 = [[Num{color = Red; num = 10}; Joker; Joker]]
+let board6 =
+  [
+    [ Num { color = Red; num = 8 }; Num { color = Red; num = 9 }; Joker ];
+    [
+      Num { color = Blue; num = 10 };
+      Num { color = Red; num = 10 };
+      Num { color = Yellow; num = 10 };
+    ];
+  ]
 
-let board8 = [[Num{color = Yellow; num = 10}; Joker; 
-Num{color = Yellow; num = 12}; Joker]]
+let board7 = [ [ Num { color = Red; num = 10 }; Joker; Joker ] ]
 
-let board9 = [[Num{color = Red; num = 4}; Num{color = Blue; num = 4}; 
-Num{color = Yellow; num = 4}; Num{color = Black; num = 4}; 
-Num{color = Yellow; num = 4}]]
+let board8 =
+  [
+    [
+      Num { color = Yellow; num = 10 };
+      Joker;
+      Num { color = Yellow; num = 12 };
+      Joker;
+    ];
+  ]
 
-module Printer = CLIPrinter (Game)
+let board9 =
+  [
+    [
+      Num { color = Red; num = 4 };
+      Num { color = Blue; num = 4 };
+      Num { color = Yellow; num = 4 };
+      Num { color = Black; num = 4 };
+      Num { color = Yellow; num = 4 };
+    ];
+  ]
 
-let board_tests = [ ("testing testy test" >:: fun _ -> assert_equal [] []);
-  
-  ("not enough tiles in board" >:: fun _ -> assert_equal false 
-  (Board.check board1));
+module Printer = CLIPrinter
 
-  ("not enough tiles in set" >:: fun _ -> assert_equal false 
-  (Board.check board2));
+let board_tests =
+  [
+    ("testing testy test" >:: fun _ -> assert_equal [] []);
+    ( "not enough tiles in board" >:: fun _ ->
+      assert_equal false (Board.check board1) );
+    ( "not enough tiles in set" >:: fun _ ->
+      assert_equal false (Board.check board2) );
+    ( "not enough tiles middle of board" >:: fun _ ->
+      assert_equal false (Board.check board3) );
+    ( "simple same colors (2 sets)" >:: fun _ ->
+      assert_equal true (Board.check board4) );
+    ( "simple same numbers (2 sets)" >:: fun _ ->
+      assert_equal true (Board.check board5) );
+    ( "simple one set each type" >:: fun _ ->
+      assert_equal true (Board.check board6) );
+    ("one set two jokers" >:: fun _ -> assert_equal true (Board.check board6));
+    ( "scattered jokers same color" >:: fun _ ->
+      assert_equal true (Board.check board8) );
+    ( "too many tiles with same num" >:: fun _ ->
+      assert_equal false (Board.check board9) );
+  ]
 
-  ("not enough tiles middle of board" >:: fun _ -> assert_equal false 
-  (Board.check board3));
-
-  ("simple same colors (2 sets)" >:: fun _ -> assert_equal true 
-  (Board.check board4));
-
-  ("simple same numbers (2 sets)" >:: fun _ -> assert_equal true
-  (Board.check board5));
-
-  ("simple one set each type" >:: fun _ -> assert_equal true
-  (Board.check board6));
-
-  ("one set two jokers" >:: fun _ -> assert_equal true
-  (Board.check board6));
-
-  ("scattered jokers same color" >:: fun _ -> assert_equal true
-  (Board.check board8));
-
-  ("too many tiles with same num" >:: fun _ -> assert_equal false
-  (Board.check board9));
-
-]
 let game_tests = []
+
+let model_helper_tests =
+  [
+    ("test insert on empty list" >:: fun _ -> assert_equal [ 1 ] (insert 1 [] 0));
+    ( "test insert, append to list" >:: fun _ ->
+      assert_equal [ 1; 2; 3; 4 ] (insert 4 [ 1; 2; 3 ] 3) );
+    ( "test insert, prepend to list" >:: fun _ ->
+      assert_equal [ 1; 2; 3; 4 ] (insert 1 [ 2; 3; 4 ] 0) );
+    ( "test insert, insert element in middle of list" >:: fun _ ->
+      assert_equal [ 1; 2; 3; 4 ] (insert 2 [ 1; 3; 4 ] 1) );
+    ( "test replace on short list" >:: fun _ ->
+      assert_equal [ 1; 5; 3; 4 ] (replace 5 [ 1; 2; 3; 4 ] 1) );
+    ( "test replace, replace head" >:: fun _ ->
+      assert_equal [ 5; 2; 3; 4 ] (replace 5 [ 1; 2; 3; 4 ] 0) );
+    ( "test replace, replace tail" >:: fun _ ->
+      assert_equal [ 1; 2; 3; 5 ] (replace 5 [ 1; 2; 3; 4 ] 3) );
+    ( "test remove on short list" >:: fun _ ->
+      assert_equal (2, [ 1; 3; 4 ]) (remove 1 [ 1; 2; 3; 4 ]) );
+    ( "test remove, remove head" >:: fun _ ->
+      assert_equal (1, [ 2; 3; 4 ]) (remove 0 [ 1; 2; 3; 4 ]) );
+    ( "test remove, remove tail" >:: fun _ ->
+      assert_equal (4, [ 1; 2; 3 ]) (remove 3 [ 1; 2; 3; 4 ]) );
+  ]
 
 let printer_tests =
   [
@@ -83,9 +160,14 @@ let printer_tests =
       assert_equal "[2Y]" (Printer.string_of_tile t1) );
     ( "test string_of_tile on numbered tile 13K" >:: fun _ ->
       assert_equal "[13K]" (Printer.string_of_tile t2) );
+    ( "test string_of_row on short row" >:: fun _ ->
+      assert_equal "[5R] [6R] [7R]" (Printer.string_of_row row1) );
+    ( "test string_of_row on short row with joker" >:: fun _ ->
+      assert_equal "[5K] [JJ] [7Y]" (Printer.string_of_row row2) );
   ]
 
 let suite =
-  "test suite for rummikaml" >::: List.flatten [ board_tests; game_tests ]
+  "test suite for rummikaml"
+  >::: List.flatten [ board_tests; game_tests; printer_tests ]
 
 let () = run_test_tt_main suite

@@ -25,6 +25,11 @@ module type ViewType = sig
   (**Returns the string representation of a tile [tile] in the form
        "[<Num><Color>]". Examples: string_of_tile Joker = "[JJ]",
         string_of_tile Num {color = Yellow; num = 2} = "[2Y]"*)
+
+  val string_of_row : tile list -> string
+  (**Returns the string representation of a row [tile] in the form
+     "[<Num><Color>] [<Num><Color>] ..." (spaced tile strings). Requires: [row]
+     is non-empty. *)
 end
 
 module CLIPrinter : ViewType

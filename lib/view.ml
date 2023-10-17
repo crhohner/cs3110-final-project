@@ -8,6 +8,7 @@ module type ViewType = sig
   val show_turn : game_state -> unit
   val show_help : unit -> unit
   val string_of_tile : tile -> string
+  val string_of_row : tile list -> string
 end
 
 (**An implementation of ViewType which prints information about the game to the
@@ -26,8 +27,6 @@ module CLIPrinter : ViewType = struct
         in
         "[" ^ string_of_int n.num ^ color ^ "]"
 
-  (**Returns the string representation of a row [row] as tiles separated by
-     single spaces.*)
   let string_of_row (row : tile list) : string =
     let rec aux (row : tile list) (acc : string) =
       match row with

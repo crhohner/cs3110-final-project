@@ -22,6 +22,19 @@ type game_state = {
   deck : tile list;
 }
 
+val insert : 'a -> 'a list -> int -> 'a list
+(** Returns [lst] with [ele] inserted at index [i]. Requires: 0 <= [i] <= length
+    of [lst]. Raises Invalid_argument with invalid [i].*)
+
+val replace : 'a -> 'a list -> int -> 'a list
+(** Returns [lst] with [ele] in place of the [i]th element of [lst]. Requires: 0
+    <= [i] < length of [lst]. Raises Invalid_argument with invalid [i].*)
+
+val remove : int -> 'a list -> 'a * 'a list
+(** Returns [lst] with the [i]th element removed, along with the removed element
+    as an option. Requires: 0 <= [i] < length of [lst]. Raises Invalid_argument
+    with invalid [i].*)
+
 (** A BoardType represents a Rummikaml board *)
 module type BoardType = sig
   (*Representation type*)
