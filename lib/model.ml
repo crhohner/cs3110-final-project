@@ -38,13 +38,44 @@ module Board : BoardType with type t = tile list list = struct
   (*every row is a list of tiles*)
   type t = tile list list
 
+  (** Helper for add, puts tile into row at index i, 
+      if i > lst length then puts at end of list*)
+  let rec put_tile (ele : 'a) (lst : 'a list) (i : int) : 'a list =
+    match lst with 
+    | [] -> [ele] 
+    | h :: t when i > 0 -> h :: put_tile ele t (i-1) 
+    | _ -> ele :: lst
+
+  (** Helper for add, replaces element at index i with [ele] in [lst]*)
+  let rec put_row (ele : 'a) (lst : 'a list) (i : int) : 'a list  =
+    match lst with 
+    | [] -> [ele] 
+    | h :: t when i > 0 -> h :: put_row ele t (i-1) 
+    | _ :: t -> ele :: t 
+
   let add (board : tile list list) (tile : tile) (loc : int * int) :
       tile list list =
-    failwith "unimplemented"
+    let row = List.nth board (fst loc) in 
+    let new_row = put_tile tile row (snd loc) in 
+    put_row new_row board (fst loc)
+
+  (** Helper for move, removes tile at location [i] and returns that 
+      tile*)
+  let rec remove (i : int) (lst : 'a list) : 'a option * 'a list = 
+    match lst with 
+    | [] -> (None, [])
+    | h :: t when i > 0 -> let next = remove (i-1) t in
+      (fst next, h :: (snd next))
+    | h :: t -> (Some h, t)
 
   let move (board : tile list list) (startLoc : int * int) (endLoc : int * int)
       : tile list list =
-    failwith "unimplemented"
+      let row = List.nth board (fst startLoc) in 
+      let (tile, new_row) = remove (snd startLoc) row in 
+      let mid_board = put_row new_row board (fst startLoc) in 
+      match tile with 
+      | None -> board
+      | Some t -> add mid_board t endLoc 
 
   let new_row (board : tile list list) (tile : tile) : tile list list =
     failwith "unimplemented"

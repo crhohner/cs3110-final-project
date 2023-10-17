@@ -98,7 +98,7 @@ module CLIPrinter : ViewType = struct
 
   let show_actions () =
     print_endline
-      "actions: add to row (a) | start new row (n)| move (m) | end turn (e) | \
+      "actions: add to row (a) | start new row (n) | move (m) | end turn (e) | \
        help (h) "
 
   let show_turn (state : game_state) : unit =
