@@ -92,6 +92,17 @@ let board8 =
     ];
   ]
 
+let board8add = 
+  [
+    [
+      Num { color = Yellow; num = 9 };
+      Num { color = Yellow; num = 10 };
+      Joker;
+      Num { color = Yellow; num = 12 };
+      Joker;
+    ];
+  ]
+
 let board9 =
   [
     [
@@ -103,11 +114,136 @@ let board9 =
     ];
   ]
 
+let board10 =
+  [
+    [
+      Num { color = Red; num = 4 };
+      Num { color = Blue; num = 4 };
+      Num { color = Black; num = 4};
+    ]; 
+    [
+      Num { color = Red; num = 10 };
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 12 };
+    ]
+  ]
+
+let board10add1 =
+  [
+    [
+      Num { color = Red; num = 4 };
+      Num { color = Blue; num = 4 };
+      Num { color = Yellow; num = 4 };
+      Num { color = Black; num = 4};
+    ]; 
+    [
+      Num { color = Red; num = 10 };
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 12 };
+    ]
+  ]
+
+let board10add2 = 
+  [
+    [
+      Num { color = Red; num = 4 };
+      Num { color = Blue; num = 4 };
+      Num { color = Black; num = 4};
+    ]; 
+    [
+      Num { color = Red; num = 10 };
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 12 };
+      Num { color = Red; num = 13 };
+    ]
+  ]
+
+let board11 = 
+  [
+    [
+      Num { color = Yellow; num = 10 };
+      Num { color = Yellow; num = 11 };
+      Num { color = Yellow; num = 12 };
+      Num { color = Yellow; num = 13 };
+    ];
+  ]
+
+let board12 =
+  [
+    [
+      Num { color = Red; num = 2 };
+      Num { color = Red; num = 3 };
+      Num { color = Red; num = 4 }; 
+    ];
+    [
+      Num { color = Blue; num = 9 };
+      Num { color = Black; num = 9 };
+      Num { color = Yellow; num = 9 };
+    ]
+  ]
+
+let board13 =
+  [
+    [
+      Num { color = Blue; num = 2 };
+      Num { color = Yellow; num = 2 };
+      Num { color = Red; num = 2 };
+    ];
+  ]
+
+let board14 = 
+  [
+    [
+      Joker;
+      Num { color = Red; num = 10 };
+      Joker;
+    ]
+  ]
+
+let board15 = 
+  [
+    [
+      Num { color = Red; num = 10 };
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 13 };
+    ];
+  ]
+
+let board16 =
+  [
+    [
+      Num { color = Red; num = 10 };
+      Num { color = Red; num = 10 };
+      Num { color = Blue; num = 10 };
+    ];
+  ]
+
+let board17 = 
+  [
+    [
+      Num { color = Yellow; num = 9 };
+      Joker;
+      Num { color = Yellow; num = 10 };
+      Num { color = Yellow; num = 12 };
+    ]
+  ]
+
 module Printer = CLIPrinter
 
 let board_tests =
   [
-    ("testing testy test" >:: fun _ -> assert_equal [] []);
+    (*add tests*)
+    ( "tile at front of one row board" >:: fun _ -> 
+      assert_equal board8add (Board.add board8 
+      (Num{color = Yellow; num = 9}) (0, 0)) );
+    ( "tile in first row" >:: fun _ ->
+      assert_equal board10add1 (Board.add board10
+      (Num{color = Yellow; num = 4}) (0, 2)) );
+    ( "tile at end of last row" >:: fun _ -> 
+      assert_equal board10add2 (Board.add board10
+      (Num{color = Red; num = 13}) (1, 3)) );
+
+    (*check tests*)
     ( "not enough tiles in board" >:: fun _ ->
       assert_equal false (Board.check board1) );
     ( "not enough tiles in set" >:: fun _ ->
@@ -120,11 +256,31 @@ let board_tests =
       assert_equal true (Board.check board5) );
     ( "simple one set each type" >:: fun _ ->
       assert_equal true (Board.check board6) );
-    ("one set two jokers" >:: fun _ -> assert_equal true (Board.check board6));
+    ( "one set two jokers" >:: fun _ -> 
+      assert_equal true (Board.check board6) );
     ( "scattered jokers same color" >:: fun _ ->
       assert_equal true (Board.check board8) );
     ( "too many tiles with same num" >:: fun _ ->
       assert_equal false (Board.check board9) );
+    ( "too many tiles with same color" >:: fun _ ->
+      assert_equal false (Board.check board16) );
+    ( "tiles not off-by-one" >:: fun _ -> 
+      assert_equal false (Board.check board15) );
+    ( "joker not placed correctly" >:: fun _ -> 
+      assert_equal false (Board.check board17) );
+
+    (*check_first tests*)
+    ( "simple one row > 30" >:: fun _ ->
+      assert_equal true (Board.check_first board11) );
+    ( "simple multiple row > 30" >:: fun _ -> 
+      assert_equal true (Board.check_first board12) );
+    ( "simple board < 30" >:: fun _ ->
+      assert_equal false (Board.check_first board13) );
+    ( "simple board = 30 with Jokers" >:: fun _ -> 
+      assert_equal true (Board.check_first board14) );
+    ( "board > 30 but invalid" >:: fun _ -> 
+      assert_equal false (Board.check_first board15) );
+
   ]
 
 let game_tests = []

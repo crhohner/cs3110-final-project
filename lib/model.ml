@@ -137,7 +137,7 @@ module Board : BoardType with type t = tile list list = struct
         | _ -> true)
     | [ h1; h2; h3 ] -> (
         match (h1, h2, h3) with
-        | Num n1, Num n2, Num n3 -> true
+        | Num n1, Num n2, Num n3 -> n2.num == n1.num + 1 && n3.num == n2.num + 1
         | Num n1, Joker, Num n2 -> n2.num == n1.num + 2
         | Num n1, Num n2, Joker | Joker, Num n1, Num n2 -> n2.num == n1.num + 1
         | _ -> true)
