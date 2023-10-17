@@ -238,7 +238,24 @@ module Board : BoardType with type t = tile list list = struct
                   else false
                 else false))
 
-  let check_first (board : tile list list) : bool = failwith "unimplemented"
+  (** Helper for check_first, returns sum of tiles in row*)
+  let rec count_tiles (lst : tile list) : int =
+    match lst with 
+    | [] -> 0
+    | h :: t -> 
+      match h with 
+      | Num n -> n.num + count_tiles t
+      | Joker -> 10 + count_tiles t
+
+  let rec check_first (board : tile list list) : bool = 
+    if check board then 
+      let rec tiles b = (
+        match b with 
+        | [] -> 0
+        | h :: t -> count_tiles h + tiles t) in
+      tiles board >= 30
+    else false
+
 end
 
 (** A GameType represents the whole state of a Rummikaml game *)
