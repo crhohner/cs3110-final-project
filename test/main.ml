@@ -228,6 +228,46 @@ let board17 =
     ]
   ]
 
+let board18 = 
+  [
+    [
+      Num { color = Yellow; num = 9 };
+      Joker;
+      Num { color = Yellow; num = 10 };
+      Num { color = Yellow; num = 12 };
+    ];
+    [
+      Joker;
+    ];
+  ]
+
+let board19 = 
+  [
+    [
+      Num { color = Red; num = 10 };
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 13 };
+    ];
+    [
+      t2;
+    ];
+  ]
+
+let board20 = 
+  [
+    [
+      Num { color = Red; num = 10 };
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 13 };
+    ];
+    [
+      t2;
+    ];
+    [
+      Joker;
+    ]
+  ]
+
 module Printer = CLIPrinter
 
 let board_tests =
@@ -242,6 +282,18 @@ let board_tests =
     ( "tile at end of last row" >:: fun _ -> 
       assert_equal board10add2 (Board.add board10
       (Num{color = Red; num = 13}) (1, 3)) );
+
+    (*move tests*)
+
+    (*new_row tests*)
+    ( "adding tile to empty row" >:: fun _ -> 
+      assert_equal [[Joker]] (Board.new_row [] Joker) );
+    ( "adding joker to new row" >:: fun _ -> 
+      assert_equal board18 (Board.new_row board17 Joker) );
+    ( "adding num tile to new row" >:: fun _ -> 
+      assert_equal board19 (Board.new_row board15 t2) );
+    ( "adding num tile to board with >1 rows" >:: fun _ -> 
+      assert_equal board20 (Board.new_row board19 Joker) );
 
     (*check tests*)
     ( "not enough tiles in board" >:: fun _ ->
