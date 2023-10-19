@@ -228,7 +228,7 @@ let board17 =
     ]
   ]
 
-let board18 = 
+let board_a = 
   [
     [
       Num { color = Yellow; num = 9 };
@@ -241,7 +241,7 @@ let board18 =
     ];
   ]
 
-let board19 = 
+let board_b = 
   [
     [
       Num { color = Red; num = 10 };
@@ -253,7 +253,7 @@ let board19 =
     ];
   ]
 
-let board20 = 
+let board_c = 
   [
     [
       Num { color = Red; num = 10 };
@@ -266,6 +266,66 @@ let board20 =
     [
       Joker;
     ]
+  ]
+
+let board_d = 
+  [
+    [
+      Num { color = Red; num = 10 };
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 13 };
+    ];
+    [
+      t2; 
+      Joker;
+    ];
+  ]
+
+let board_e = 
+  [
+    [
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 13 };
+      Num { color = Red; num = 10 };
+    ];
+    [
+      t2;
+    ];
+  ]
+
+let board_f = 
+  [
+    [
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 13 };
+    ];
+    [
+      t2;
+      Num { color = Red; num = 10 };
+    ];
+  ]
+
+let board_g = 
+  [
+    [
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 13 };
+      t2;
+      Num { color = Red; num = 10 };
+    ];
+    [
+
+    ];
+  ]
+
+let board_h = 
+  [
+    [
+      Num { color = Red; num = 11 };
+      Num { color = Red; num = 13 };
+      t2;
+      Num { color = Red; num = 10 };
+    ];
   ]
 
 module Printer = CLIPrinter
@@ -284,16 +344,35 @@ let board_tests =
       (Num{color = Red; num = 13}) (1, 3)) );
 
     (*move tests*)
+    ( "move tile to same pos" >:: fun _ -> 
+      assert_equal board_a (Board.move board_a (0,0) (0,0)) );
+    ( "move tile to same pos" >:: fun _ -> 
+      assert_equal board_d (Board.move board_d (1,1) (1,1)) );
+    ( "move tile across same row" >:: fun _ -> 
+      assert_equal board_e (Board.move board_b (0,0) (0,2)) );
+    ( "move tile across diff row" >:: fun _ -> 
+      assert_equal board_f (Board.move board_e (0,2) (1,1)) );
+    ( "move last tile of its row" >:: fun _ -> 
+      assert_equal board_g (Board.move board_e (1,0) (0,2)) );
+    (* this is an interesting case – would it be better to 
+      remove the entire row in this instance? *)
+    ( "move last tile of its row" >:: fun _ -> 
+      assert_equal board_g (Board.move board_e (1,0) (0,2)) );
+    (* another interesting case below, commented out; not sure
+      on exact functionality but I would assume move can move a
+      tile to from one row to a new one *)
+    (* "move tile to new row" >:: fun _ -> 
+      assert_equal board_e (Board.move board_h (0,2) (1,0)) *)
 
     (*new_row tests*)
     ( "adding tile to empty row" >:: fun _ -> 
       assert_equal [[Joker]] (Board.new_row [] Joker) );
     ( "adding joker to new row" >:: fun _ -> 
-      assert_equal board18 (Board.new_row board17 Joker) );
+      assert_equal board_a (Board.new_row board17 Joker) );
     ( "adding num tile to new row" >:: fun _ -> 
-      assert_equal board19 (Board.new_row board15 t2) );
+      assert_equal board_b (Board.new_row board15 t2) );
     ( "adding num tile to board with >1 rows" >:: fun _ -> 
-      assert_equal board20 (Board.new_row board19 Joker) );
+      assert_equal board_c (Board.new_row board_b Joker) );
 
     (*check tests*)
     ( "not enough tiles in board" >:: fun _ ->
