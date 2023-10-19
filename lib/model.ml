@@ -294,7 +294,8 @@ module Game : GameType = struct
       create_deck (n - 1) lst @ l @ l
 
   (** Helper for subset function that removes nth element in given list -
-      returns tuple of element removed and modified list *)
+      returns tuple of element removed and modified list. Requires n is index
+      within bounds of given list. *)
   let rec pop (n : int) (lst : tile list) : tile * tile list =
     if n = 0 then (List.hd lst, List.tl lst)
     else
@@ -307,7 +308,8 @@ module Game : GameType = struct
     if n = 0 then ([], lst)
     else
       let _ = Random.self_init () in
-      let popped = pop (Random.int (List.length lst)) lst in
+      let num = Random.int (List.length lst) in
+      let popped = pop num lst in
       let lsts = subset (n - 1) (snd popped) in
       (fst popped :: fst lsts, snd lsts)
 
@@ -316,13 +318,12 @@ module Game : GameType = struct
       remaining deck *)
   let rec distribute_hand (players : player list) (deck : tile list) :
       player list * tile list =
-    if players = [] then ([], deck)
-    else
-      let s = subset 14 deck in
-      let player = List.hd players in
-      let remaining = List.tl players in
-      ( { player with hand = fst s } :: fst (distribute_hand remaining (snd s)),
-        snd (distribute_hand remaining (snd s)) )
+    match players with
+    | [] -> ([], deck)
+    | h :: t ->
+        let s = subset 14 deck in
+        let d = distribute_hand t (snd s) in
+        ({ h with hand = fst s } :: fst d, snd d)
 
   (** Returns a game state [state] with a randomly selected player as the head
       of the player queue, [state.players]*)

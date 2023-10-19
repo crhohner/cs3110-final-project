@@ -92,7 +92,7 @@ let board8 =
     ];
   ]
 
-let board8add = 
+let board8add =
   [
     [
       Num { color = Yellow; num = 9 };
@@ -119,13 +119,13 @@ let board10 =
     [
       Num { color = Red; num = 4 };
       Num { color = Blue; num = 4 };
-      Num { color = Black; num = 4};
-    ]; 
+      Num { color = Black; num = 4 };
+    ];
     [
       Num { color = Red; num = 10 };
       Num { color = Red; num = 11 };
       Num { color = Red; num = 12 };
-    ]
+    ];
   ]
 
 let board10add1 =
@@ -134,31 +134,31 @@ let board10add1 =
       Num { color = Red; num = 4 };
       Num { color = Blue; num = 4 };
       Num { color = Yellow; num = 4 };
-      Num { color = Black; num = 4};
-    ]; 
+      Num { color = Black; num = 4 };
+    ];
     [
       Num { color = Red; num = 10 };
       Num { color = Red; num = 11 };
       Num { color = Red; num = 12 };
-    ]
+    ];
   ]
 
-let board10add2 = 
+let board10add2 =
   [
     [
       Num { color = Red; num = 4 };
       Num { color = Blue; num = 4 };
-      Num { color = Black; num = 4};
-    ]; 
+      Num { color = Black; num = 4 };
+    ];
     [
       Num { color = Red; num = 10 };
       Num { color = Red; num = 11 };
       Num { color = Red; num = 12 };
       Num { color = Red; num = 13 };
-    ]
+    ];
   ]
 
-let board11 = 
+let board11 =
   [
     [
       Num { color = Yellow; num = 10 };
@@ -173,13 +173,13 @@ let board12 =
     [
       Num { color = Red; num = 2 };
       Num { color = Red; num = 3 };
-      Num { color = Red; num = 4 }; 
+      Num { color = Red; num = 4 };
     ];
     [
       Num { color = Blue; num = 9 };
       Num { color = Black; num = 9 };
       Num { color = Yellow; num = 9 };
-    ]
+    ];
   ]
 
 let board13 =
@@ -191,16 +191,9 @@ let board13 =
     ];
   ]
 
-let board14 = 
-  [
-    [
-      Joker;
-      Num { color = Red; num = 10 };
-      Joker;
-    ]
-  ]
+let board14 = [ [ Joker; Num { color = Red; num = 10 }; Joker ] ]
 
-let board15 = 
+let board15 =
   [
     [
       Num { color = Red; num = 10 };
@@ -218,14 +211,14 @@ let board16 =
     ];
   ]
 
-let board17 = 
+let board17 =
   [
     [
       Num { color = Yellow; num = 9 };
       Joker;
       Num { color = Yellow; num = 10 };
       Num { color = Yellow; num = 12 };
-    ]
+    ];
   ]
 
 module Printer = CLIPrinter
@@ -233,16 +226,15 @@ module Printer = CLIPrinter
 let board_tests =
   [
     (*add tests*)
-    ( "tile at front of one row board" >:: fun _ -> 
-      assert_equal board8add (Board.add board8 
-      (Num{color = Yellow; num = 9}) (0, 0)) );
+    ( "tile at front of one row board" >:: fun _ ->
+      assert_equal board8add
+        (Board.add board8 (Num { color = Yellow; num = 9 }) (0, 0)) );
     ( "tile in first row" >:: fun _ ->
-      assert_equal board10add1 (Board.add board10
-      (Num{color = Yellow; num = 4}) (0, 2)) );
-    ( "tile at end of last row" >:: fun _ -> 
-      assert_equal board10add2 (Board.add board10
-      (Num{color = Red; num = 13}) (1, 3)) );
-
+      assert_equal board10add1
+        (Board.add board10 (Num { color = Yellow; num = 4 }) (0, 2)) );
+    ( "tile at end of last row" >:: fun _ ->
+      assert_equal board10add2
+        (Board.add board10 (Num { color = Red; num = 13 }) (1, 3)) );
     (*check tests*)
     ( "not enough tiles in board" >:: fun _ ->
       assert_equal false (Board.check board1) );
@@ -256,34 +248,179 @@ let board_tests =
       assert_equal true (Board.check board5) );
     ( "simple one set each type" >:: fun _ ->
       assert_equal true (Board.check board6) );
-    ( "one set two jokers" >:: fun _ -> 
-      assert_equal true (Board.check board6) );
+    ("one set two jokers" >:: fun _ -> assert_equal true (Board.check board6));
     ( "scattered jokers same color" >:: fun _ ->
       assert_equal true (Board.check board8) );
     ( "too many tiles with same num" >:: fun _ ->
       assert_equal false (Board.check board9) );
     ( "too many tiles with same color" >:: fun _ ->
       assert_equal false (Board.check board16) );
-    ( "tiles not off-by-one" >:: fun _ -> 
+    ( "tiles not off-by-one" >:: fun _ ->
       assert_equal false (Board.check board15) );
-    ( "joker not placed correctly" >:: fun _ -> 
+    ( "joker not placed correctly" >:: fun _ ->
       assert_equal false (Board.check board17) );
-
     (*check_first tests*)
     ( "simple one row > 30" >:: fun _ ->
       assert_equal true (Board.check_first board11) );
-    ( "simple multiple row > 30" >:: fun _ -> 
+    ( "simple multiple row > 30" >:: fun _ ->
       assert_equal true (Board.check_first board12) );
     ( "simple board < 30" >:: fun _ ->
       assert_equal false (Board.check_first board13) );
-    ( "simple board = 30 with Jokers" >:: fun _ -> 
+    ( "simple board = 30 with Jokers" >:: fun _ ->
       assert_equal true (Board.check_first board14) );
-    ( "board > 30 but invalid" >:: fun _ -> 
+    ( "board > 30 but invalid" >:: fun _ ->
       assert_equal false (Board.check_first board15) );
-
   ]
 
-let game_tests = []
+let player_1 =
+  { hand = [ Joker; Num { num = 1; color = Blue } ]; name = "Alice" }
+
+let player_2 =
+  {
+    hand = [ Num { num = 2; color = Yellow }; Num { num = 10; color = Blue } ];
+    name = "Grace";
+  }
+
+let player_3 =
+  { hand = [ Num { num = 8; color = Red }; Joker ]; name = "David" }
+
+let player_4 =
+  {
+    hand = [ Num { num = 9; color = Red }; Num { num = 2; color = Yellow } ];
+    name = "Joy";
+  }
+
+let gs_no_players = { players = []; board = board1; deck = [] }
+let gs_single_player = { players = [ player_1 ]; board = board1; deck = [] }
+
+let gs_two_players =
+  { players = [ player_2; player_4 ]; board = board1; deck = [] }
+
+let gs_multi_player =
+  {
+    players = [ player_1; player_2; player_3; player_4 ];
+    board = board1;
+    deck = [];
+  }
+
+let make_single_player = Game.make [ "Alice" ]
+let make_two_players = Game.make [ "Alice"; "Grace" ]
+let make_multi_player = Game.make [ "Alice"; "Grace"; "David"; "Joy" ]
+
+(* -------------------- Helpers to test make -------------------- *)
+(* Helper that maps given tile to an integer *)
+let num_of_tile (t : tile) : int =
+  match t with
+  | Joker -> 0
+  | Num { num = n; color = c } -> (
+      match c with
+      | Yellow -> 14 * n
+      | Red -> 15 * n
+      | Blue -> 16 * n
+      | Black -> 17 * n)
+
+(* Helper that compares two lists and determines whether they contain the same
+   elements - order doesn't matter *)
+let cmp (lst1 : tile list) (lst2 : tile list) : bool =
+  let sort1 = List.sort (fun t1 t2 -> num_of_tile t1 - num_of_tile t2) lst1 in
+  let sort2 = List.sort (fun t1 t2 -> num_of_tile t1 - num_of_tile t2) lst2 in
+  sort1 = sort2
+
+(* Helper that takes in list of players and returns all tiles in players'
+   hands*)
+let all_hands (lst : player list) : tile list =
+  List.fold_left (fun acc player -> acc @ player.hand) [] lst
+
+(* Helper used to create a complete deck of tiles *)
+let rec create_deck (n : int) (lst : tile list) : tile list =
+  if n = 0 then [ Joker; Joker ]
+  else
+    let l =
+      [
+        Num { num = n; color = Yellow };
+        Num { num = n; color = Red };
+        Num { num = n; color = Blue };
+        Num { num = n; color = Black };
+      ]
+    in
+    create_deck (n - 1) lst @ l @ l
+
+(* -------------------- End of helpers to test make -------------------- *)
+
+let entire_deck = create_deck 13 []
+
+let game_tests =
+  [
+    (* unit tests of next_player *)
+    ( "test next_player when no players" >:: fun _ ->
+      assert_equal [] (Game.next_player gs_no_players).players );
+    ( "test next_player when single player" >:: fun _ ->
+      assert_equal [ player_1 ] (Game.next_player gs_single_player).players );
+    ( "test next_player when two players" >:: fun _ ->
+      assert_equal [ player_4; player_2 ]
+        (Game.next_player gs_two_players).players );
+    ( "test next_player when multiple players" >:: fun _ ->
+      assert_equal
+        [ player_2; player_3; player_4; player_1 ]
+        (Game.next_player gs_multi_player).players );
+    ( "test next_player many times when single player" >:: fun _ ->
+      assert_equal [ player_1 ]
+        (gs_single_player |> Game.next_player |> Game.next_player).players );
+    ( "test next_player many times when multiple players" >:: fun _ ->
+      assert_equal
+        [ player_4; player_1; player_2; player_3 ]
+        (gs_multi_player |> Game.next_player |> Game.next_player
+       |> Game.next_player)
+          .players );
+    (* unit tests of make *)
+    (let p = make_single_player.players in
+     let h = (List.hd p).hand in
+     "test hand size, single player" >:: fun _ ->
+     assert_equal 14 (List.length h));
+    (let d = make_single_player.deck in
+     "test deck size, single player" >:: fun _ ->
+     assert_equal 92 (List.length d));
+    (* ERROR *)
+    (let p = make_single_player.players in
+     let h = all_hands p in
+     let full = h @ make_single_player.deck in
+     "test entire deck, single player" >:: fun _ ->
+     assert_equal true (cmp full entire_deck));
+    (let p = make_two_players.players in
+     let h1 = (List.nth p 0).hand in
+     let h2 = (List.nth p 1).hand in
+     "test hand size, two players" >:: fun _ ->
+     assert_equal true (List.length h1 = 14 && List.length h2 = 14));
+    (let d = make_two_players.deck in
+     "test deck size, two players" >:: fun _ -> assert_equal 78 (List.length d));
+    (* ERROR *)
+    (let p = make_two_players.players in
+     let h = all_hands p in
+     let full = h @ make_two_players.deck in
+     "test entire deck, two players" >:: fun _ ->
+     assert_equal true (cmp full entire_deck));
+    (let p = make_multi_player.players in
+     let h1 = (List.nth p 0).hand in
+     let h2 = (List.nth p 1).hand in
+     let h3 = (List.nth p 2).hand in
+     let h4 = (List.nth p 3).hand in
+     "test hand size, multiple players" >:: fun _ ->
+     assert_equal true
+       (List.length h1 = 14
+       && List.length h2 = 14
+       && List.length h3 = 14
+       && List.length h4 = 14));
+    (let d = make_multi_player.deck in
+     "test deck size, multiple players" >:: fun _ ->
+     assert_equal 50 (List.length d));
+    (* ERROR *)
+    (let p = make_multi_player.players in
+     let h = all_hands p in
+     let full = h @ make_multi_player.deck in
+     "test entire deck, multiple players" >:: fun _ ->
+     assert_equal true (cmp full entire_deck));
+    (* unit tests of next_player using make *)
+  ]
 
 let model_helper_tests =
   [
