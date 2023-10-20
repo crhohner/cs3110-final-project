@@ -53,6 +53,8 @@ module type BoardType = sig
   val new_row : t -> tile -> t
   val check : t -> bool
   val check_first : t -> bool
+  val valid_get_loc : tile list list -> int * int -> bool
+  val valid_set_loc : tile list list -> int * int -> bool
 end
 
 (** A Board based on tiles *)
@@ -60,12 +62,18 @@ module Board : BoardType with type t = tile list list = struct
   (*every row is a list of tiles*)
   type t = tile list list
 
+  (*Add will throw an exception (Failure s) if you try to add to an invalid
+    position.*)
   let add (board : tile list list) (tile : tile) (loc : int * int) :
       tile list list =
-    let row = List.nth board (fst loc) in
-    let new_row = insert tile row (snd loc) in
-    replace new_row board (fst loc)
+    if loc = (List.length board, 0) then board @ [ [ tile ] ]
+    else
+      let row = List.nth board (fst loc) in
+      let new_row = insert tile row (snd loc) in
+      replace new_row board (fst loc)
 
+  (*Move will throw an exception (Failure s) if you try to add to an invalid
+    position or take a tile from an invalid position.*)
   let move (board : tile list list) (startLoc : int * int) (endLoc : int * int)
       : tile list list =
     let row = List.nth board (fst startLoc) in
@@ -73,9 +81,24 @@ module Board : BoardType with type t = tile list list = struct
     let mid_board = replace new_row board (fst startLoc) in
     add mid_board tile endLoc
 
+  let valid_get_loc (board : tile list list) (loc : int * int) : bool =
+    if fst loc < 0 || snd loc < 0 then false
+    else if fst loc >= List.length board then false
+    else
+      let row = List.nth board (fst loc) in
+      snd loc < List.length row
+
+  let valid_set_loc (board : tile list list) (loc : int * int) : bool =
+    if fst loc < 0 || snd loc < 0 then false
+    else if fst loc > List.length board then false
+    else if fst loc = List.length board then snd loc = 0
+    else
+      let row = List.nth board (fst loc) in
+      snd loc <= List.length row
+
   (** given a new tile, returns a board with the tile placed in a new row *)
   let new_row (board : tile list list) (tile : tile) : tile list list =
-    let row = [tile] in board @ [row]
+    board @ [ [ tile ] ]
 
   (** given a tile list and color, checks that all the tiles are same color*)
   let rec check_color (c : color) (tlst : tile list) : bool =

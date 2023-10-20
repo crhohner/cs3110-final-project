@@ -44,7 +44,7 @@ module CLIPrinter : ViewType = struct
     | _ ->
         List.iteri
           (fun i row ->
-            print_endline ("row " ^ string_of_int i ^ string_of_row row))
+            print_endline (string_of_int i ^ " | " ^ string_of_row row))
           state.board
 
   let rec clear (lines : int) : unit =
