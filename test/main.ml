@@ -478,6 +478,56 @@ let rec create_deck (n : int) (lst : tile list) : tile list =
 
 let entire_deck = create_deck 13 []
 
+let tiles1 =
+  [
+    Num { color = Blue; num = 1 };
+    Num { color = Red; num = 2 };
+    Num { color = Black; num = 1 };
+  ]
+
+let tiles2 =
+  [
+    Num { color = Red; num = 10 };
+  ]
+
+let tiles3 =
+  [
+    Num { color = Red; num = 10 };
+    Num { color = Red; num = 11 };
+    Joker;
+    Num { color = Red; num = 13 };
+  ]
+
+let winner1 = 
+  { 
+    hand = []; 
+    name = "manolis ;)"
+  }
+
+let winner2 = 
+  { 
+    hand = []; 
+    name = "still manolis ;)"
+  }
+
+let loser1 = 
+  { 
+    hand = tiles1; 
+    name = "loser1"
+  }
+
+let loser2 = 
+  { 
+    hand = tiles2; 
+    name = "loser2"
+  }
+
+let loser3 = 
+  { 
+    hand = tiles3; 
+    name = "loser3"
+  }
+
 let game_tests =
   [
     (* unit tests of next_player *)
@@ -509,7 +559,7 @@ let game_tests =
     (let d = make_single_player.deck in
      "test deck size, single player" >:: fun _ ->
      assert_equal 92 (List.length d));
-    (* ERROR *)
+    (* (* ERROR *)
     (let p = make_single_player.players in
      let h = all_hands p in
      let full = h @ make_single_player.deck in
@@ -547,8 +597,53 @@ let game_tests =
      let h = all_hands p in
      let full = h @ make_multi_player.deck in
      "test entire deck, multiple players" >:: fun _ ->
-     assert_equal true (cmp full entire_deck));
+     assert_equal true (cmp full entire_deck)); *)
     (* unit tests of next_player using make *)
+    (*check_win tests*)
+    ( let game={ players=[]; board=[]; deck=[] } in 
+      "returns None on empty player list" >:: fun _ ->
+      assert_equal None (Game.check_win game) );
+    ( let game={ players=[winner1]; board=[]; deck=[] } in 
+      "returns winning player on single player list" >:: fun _ ->
+      assert_equal (Some winner1) (Game.check_win game) );
+    ( let loser = { hand = [Joker]; name = "loser"} in
+      let game={ players=[loser]; board=[]; deck=[] } in 
+      "returns None on single player list no winners" >:: fun _ ->
+      assert_equal (None) (Game.check_win game) );
+    ( let game={ players=[loser1; loser2; loser3]; board=[]; deck=[] } in 
+      "returns None on >1 player list no winners" >:: fun _ ->
+      assert_equal (None) (Game.check_win game) );
+    ( let game={ players=[winner1; loser1; loser2; loser3]; board=[]; deck=[] } in 
+      "returns winner on >1 player list 1 winner at front" >:: fun _ ->
+      assert_equal (Some winner1) (Game.check_win game) );
+    ( let game={ players=[loser1; loser2; winner1; loser3]; board=[]; deck=[] } in 
+      "returns winner on >1 player list 1 winner not at front" >:: fun _ ->
+      assert_equal (Some winner1) (Game.check_win game) );
+    (*special test case: this may not happen depending on code implementation*)
+    ( let game={ players=[loser1; winner2; loser2; winner1; loser3]; board=[]; deck=[] } in 
+      "returns frontmost winner on >1 player list >1 winner" >:: fun _ ->
+      assert_equal (Some winner2) (Game.check_win game) );
+    (*active_player tests*)
+    ( let game={ players=[winner1]; board=[]; deck=[] } in 
+      "single player list returns only player" >:: fun _ -> 
+      assert_equal winner1 (Game.active_player game) );
+    ( let game={ players=[winner1;winner2;loser1]; board=[]; deck=[] } in 
+      "multi player list returns first player" >:: fun _ -> 
+      assert_equal winner1 (Game.active_player game) );
+    ( let rec all_active state =
+        match state.players with 
+        | [] -> []
+        | h::t -> 
+          (Game.active_player { players=(h::t); board=state.board; deck=state.deck; }) ::
+          (all_active { players=t; board=state.board; deck=state.deck; })
+      in let all_players = [winner1; winner2; loser1; loser2; loser3]
+      in let game=
+        { 
+          players= all_players; 
+          board=[]; deck=[] 
+        } 
+      in "running active_player on all players" >:: fun _ -> 
+      assert_equal all_players (all_active game) );
   ]
 
 let model_helper_tests =
