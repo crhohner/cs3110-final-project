@@ -25,6 +25,54 @@ let get_int () =
          | _ -> true)
        "enter a valid integer input")
 
+let tokenize (s : string) =
+  let rec aux (str : string) (acc : string list) (curr : string) : string list =
+    match String.get str 0 with
+    | exception Invalid_argument s -> curr :: acc
+    | ' ' -> aux (String.sub str 1 (String.length str - 1)) (curr :: acc) ""
+    | c ->
+        aux
+          (String.sub str 1 (String.length str - 1))
+          acc
+          (curr ^ String.make 1 c)
+  in
+
+  List.rev (aux s [] "")
+
+(* will restart entire query process if either row or index are incorrect*)
+let rec get_tile_loc (board : tile list list) =
+  print_endline ("enter row #: 0-" ^ string_of_int (List.length board - 1));
+  let row_idx = get_int () in
+  if row_idx < 0 || row_idx >= List.length board then
+    let _ = print_endline "invalid row given, try again" in
+    get_tile_loc board
+  else
+    let row = List.nth board row_idx in
+    print_endline ("enter index #: 0-" ^ string_of_int (List.length row - 1));
+    let tile_idx = get_int () in
+    let loc = (row_idx, tile_idx) in
+    if tile_idx >= 0 && tile_idx < List.length row then loc
+    else
+      let _ = print_endline "invalid index given, try again" in
+      get_tile_loc board
+
+(* will restart entire query process if either row or index are incorrect*)
+let rec get_new_tile_loc (board : tile list list) =
+  print_endline ("enter row #: 0-" ^ string_of_int (List.length board));
+  let row_idx = get_int () in
+  if row_idx < 0 || row_idx > List.length board then
+    let _ = print_endline "invalid row given, try again" in
+    get_tile_loc board
+  else
+    let row = List.nth board row_idx in
+    print_endline ("enter index #: 0-" ^ string_of_int (List.length row));
+    let tile_idx = get_int () in
+    let loc = (row_idx, tile_idx) in
+    if tile_idx >= 0 && tile_idx <= List.length row then loc
+    else
+      let _ = print_endline "invalid index given, try again" in
+      get_tile_loc board
+
 (** Returns a list of [n] player names given from the command line. Will
     substitute empty names with "player[n]" for the [n]th player. *)
 let rec get_player_names n : string list =
