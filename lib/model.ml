@@ -73,8 +73,9 @@ module Board : BoardType with type t = tile list list = struct
     let mid_board = replace new_row board (fst startLoc) in
     add mid_board tile endLoc
 
+  (** given a new tile, returns a board with the tile placed in a new row *)
   let new_row (board : tile list list) (tile : tile) : tile list list =
-    failwith "unimplemented"
+    let row = [tile] in board @ [row]
 
   (** given a tile list and color, checks that all the tiles are same color*)
   let rec check_color (c : color) (tlst : tile list) : bool =
