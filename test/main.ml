@@ -221,7 +221,7 @@ let board17 =
     ];
   ]
 
-let board_a = 
+let board_a =
   [
     [
       Num { color = Yellow; num = 9 };
@@ -229,76 +229,57 @@ let board_a =
       Num { color = Yellow; num = 10 };
       Num { color = Yellow; num = 12 };
     ];
-    [
-      Joker;
-    ];
+    [ Joker ];
   ]
 
-let board_b = 
+let board_b =
   [
     [
       Num { color = Red; num = 10 };
       Num { color = Red; num = 11 };
       Num { color = Red; num = 13 };
     ];
-    [
-      t2;
-    ];
+    [ t2 ];
   ]
 
-let board_c = 
+let board_c =
   [
     [
       Num { color = Red; num = 10 };
       Num { color = Red; num = 11 };
       Num { color = Red; num = 13 };
     ];
-    [
-      t2;
-    ];
-    [
-      Joker;
-    ]
+    [ t2 ];
+    [ Joker ];
   ]
 
-let board_d = 
+let board_d =
   [
     [
       Num { color = Red; num = 10 };
       Num { color = Red; num = 11 };
       Num { color = Red; num = 13 };
     ];
-    [
-      t2; 
-      Joker;
-    ];
+    [ t2; Joker ];
   ]
 
-let board_e = 
+let board_e =
   [
     [
       Num { color = Red; num = 11 };
       Num { color = Red; num = 13 };
       Num { color = Red; num = 10 };
     ];
-    [
-      t2;
-    ];
+    [ t2 ];
   ]
 
-let board_f = 
+let board_f =
   [
-    [
-      Num { color = Red; num = 11 };
-      Num { color = Red; num = 13 };
-    ];
-    [
-      t2;
-      Num { color = Red; num = 10 };
-    ];
+    [ Num { color = Red; num = 11 }; Num { color = Red; num = 13 } ];
+    [ t2; Num { color = Red; num = 10 } ];
   ]
 
-let board_g = 
+let board_g =
   [
     [
       Num { color = Red; num = 11 };
@@ -306,12 +287,10 @@ let board_g =
       t2;
       Num { color = Red; num = 10 };
     ];
-    [
-
-    ];
+    [];
   ]
 
-let board_h = 
+let board_h =
   [
     [
       Num { color = Red; num = 11 };
@@ -336,33 +315,33 @@ let board_tests =
       assert_equal board10add2
         (Board.add board10 (Num { color = Red; num = 13 }) (1, 3)) );
     (*move tests*)
-    ( "move tile to same pos" >:: fun _ -> 
-      assert_equal board_a (Board.move board_a (0,0) (0,0)) );
-    ( "move tile to same pos" >:: fun _ -> 
-      assert_equal board_d (Board.move board_d (1,1) (1,1)) );
-    ( "move tile across same row" >:: fun _ -> 
-      assert_equal board_e (Board.move board_b (0,0) (0,2)) );
-    ( "move tile across diff row" >:: fun _ -> 
-      assert_equal board_f (Board.move board_e (0,2) (1,1)) );
-    ( "move last tile of its row" >:: fun _ -> 
-      assert_equal board_g (Board.move board_e (1,0) (0,2)) );
-    (* this is an interesting case – would it be better to 
-      remove the entire row in this instance? *)
-    ( "move last tile of its row" >:: fun _ -> 
-      assert_equal board_g (Board.move board_e (1,0) (0,2)) );
-    (* another interesting case below, commented out; not sure
-      on exact functionality but I would assume move can move a
-      tile to from one row to a new one *)
-    (* "move tile to new row" >:: fun _ -> 
-      assert_equal board_e (Board.move board_h (0,2) (1,0)) *)
+    ( "move tile to same pos" >:: fun _ ->
+      assert_equal board_a (Board.move board_a (0, 0) (0, 0)) );
+    ( "move tile to same pos" >:: fun _ ->
+      assert_equal board_d (Board.move board_d (1, 1) (1, 1)) );
+    ( "move tile across same row" >:: fun _ ->
+      assert_equal board_e (Board.move board_b (0, 0) (0, 2)) );
+    ( "move tile across diff row" >:: fun _ ->
+      assert_equal board_f (Board.move board_e (0, 2) (1, 1)) );
+    ( "move last tile of its row" >:: fun _ ->
+      assert_equal board_g (Board.move board_e (1, 0) (0, 2)) );
+    (* this is an interesting case – would it be better to remove the entire row
+       in this instance? *)
+    ( "move last tile of its row" >:: fun _ ->
+      assert_equal board_g (Board.move board_e (1, 0) (0, 2)) );
+    (* another interesting case below, commented out; not sure on exact
+       functionality but I would assume move can move a tile to from one row to
+       a new one *)
+    (* "move tile to new row" >:: fun _ -> assert_equal board_e (Board.move
+       board_h (0,2) (1,0)) *)
     (*new_row tests*)
-    ( "adding tile to empty row" >:: fun _ -> 
-      assert_equal [[Joker]] (Board.new_row [] Joker) );
-    ( "adding joker to new row" >:: fun _ -> 
+    ( "adding tile to empty row" >:: fun _ ->
+      assert_equal [ [ Joker ] ] (Board.new_row [] Joker) );
+    ( "adding joker to new row" >:: fun _ ->
       assert_equal board_a (Board.new_row board17 Joker) );
-    ( "adding num tile to new row" >:: fun _ -> 
+    ( "adding num tile to new row" >:: fun _ ->
       assert_equal board_b (Board.new_row board15 t2) );
-    ( "adding num tile to board with >1 rows" >:: fun _ -> 
+    ( "adding num tile to board with >1 rows" >:: fun _ ->
       assert_equal board_c (Board.new_row board_b Joker) );
     (*check tests*)
     ( "not enough tiles in board" >:: fun _ ->
@@ -443,10 +422,10 @@ let num_of_tile (t : tile) : int =
   | Joker -> 0
   | Num { num = n; color = c } -> (
       match c with
-      | Yellow -> 14 * n
-      | Red -> 15 * n
-      | Blue -> 16 * n
-      | Black -> 17 * n)
+      | Yellow -> 100 + n
+      | Red -> 200 + n
+      | Blue -> 300 + n
+      | Black -> 400 + n)
 
 (* Helper that compares two lists and determines whether they contain the same
    elements - order doesn't matter *)
@@ -485,10 +464,7 @@ let tiles1 =
     Num { color = Black; num = 1 };
   ]
 
-let tiles2 =
-  [
-    Num { color = Red; num = 10 };
-  ]
+let tiles2 = [ Num { color = Red; num = 10 } ]
 
 let tiles3 =
   [
@@ -498,35 +474,11 @@ let tiles3 =
     Num { color = Red; num = 13 };
   ]
 
-let winner1 = 
-  { 
-    hand = []; 
-    name = "manolis ;)"
-  }
-
-let winner2 = 
-  { 
-    hand = []; 
-    name = "still manolis ;)"
-  }
-
-let loser1 = 
-  { 
-    hand = tiles1; 
-    name = "loser1"
-  }
-
-let loser2 = 
-  { 
-    hand = tiles2; 
-    name = "loser2"
-  }
-
-let loser3 = 
-  { 
-    hand = tiles3; 
-    name = "loser3"
-  }
+let winner1 = { hand = []; name = "manolis ;)" }
+let winner2 = { hand = []; name = "still manolis ;)" }
+let loser1 = { hand = tiles1; name = "loser1" }
+let loser2 = { hand = tiles2; name = "loser2" }
+let loser3 = { hand = tiles3; name = "loser3" }
 
 let game_tests =
   [
@@ -559,7 +511,6 @@ let game_tests =
     (let d = make_single_player.deck in
      "test deck size, single player" >:: fun _ ->
      assert_equal 92 (List.length d));
-    (* (* ERROR *)
     (let p = make_single_player.players in
      let h = all_hands p in
      let full = h @ make_single_player.deck in
@@ -572,7 +523,6 @@ let game_tests =
      assert_equal true (List.length h1 = 14 && List.length h2 = 14));
     (let d = make_two_players.deck in
      "test deck size, two players" >:: fun _ -> assert_equal 78 (List.length d));
-    (* ERROR *)
     (let p = make_two_players.players in
      let h = all_hands p in
      let full = h @ make_two_players.deck in
@@ -592,58 +542,69 @@ let game_tests =
     (let d = make_multi_player.deck in
      "test deck size, multiple players" >:: fun _ ->
      assert_equal 50 (List.length d));
-    (* ERROR *)
     (let p = make_multi_player.players in
      let h = all_hands p in
      let full = h @ make_multi_player.deck in
      "test entire deck, multiple players" >:: fun _ ->
-     assert_equal true (cmp full entire_deck)); *)
+     assert_equal true (cmp full entire_deck));
     (* unit tests of next_player using make *)
     (*check_win tests*)
-    ( let game={ players=[]; board=[]; deck=[] } in 
-      "returns None on empty player list" >:: fun _ ->
-      assert_equal None (Game.check_win game) );
-    ( let game={ players=[winner1]; board=[]; deck=[] } in 
-      "returns winning player on single player list" >:: fun _ ->
-      assert_equal (Some winner1) (Game.check_win game) );
-    ( let loser = { hand = [Joker]; name = "loser"} in
-      let game={ players=[loser]; board=[]; deck=[] } in 
-      "returns None on single player list no winners" >:: fun _ ->
-      assert_equal (None) (Game.check_win game) );
-    ( let game={ players=[loser1; loser2; loser3]; board=[]; deck=[] } in 
-      "returns None on >1 player list no winners" >:: fun _ ->
-      assert_equal (None) (Game.check_win game) );
-    ( let game={ players=[winner1; loser1; loser2; loser3]; board=[]; deck=[] } in 
-      "returns winner on >1 player list 1 winner at front" >:: fun _ ->
-      assert_equal (Some winner1) (Game.check_win game) );
-    ( let game={ players=[loser1; loser2; winner1; loser3]; board=[]; deck=[] } in 
-      "returns winner on >1 player list 1 winner not at front" >:: fun _ ->
-      assert_equal (Some winner1) (Game.check_win game) );
+    (let game = { players = []; board = []; deck = [] } in
+     "returns None on empty player list" >:: fun _ ->
+     assert_equal None (Game.check_win game));
+    (let game = { players = [ winner1 ]; board = []; deck = [] } in
+     "returns winning player on single player list" >:: fun _ ->
+     assert_equal (Some winner1) (Game.check_win game));
+    (let loser = { hand = [ Joker ]; name = "loser" } in
+     let game = { players = [ loser ]; board = []; deck = [] } in
+     "returns None on single player list no winners" >:: fun _ ->
+     assert_equal None (Game.check_win game));
+    (let game =
+       { players = [ loser1; loser2; loser3 ]; board = []; deck = [] }
+     in
+     "returns None on >1 player list no winners" >:: fun _ ->
+     assert_equal None (Game.check_win game));
+    (let game =
+       { players = [ winner1; loser1; loser2; loser3 ]; board = []; deck = [] }
+     in
+     "returns winner on >1 player list 1 winner at front" >:: fun _ ->
+     assert_equal (Some winner1) (Game.check_win game));
+    (let game =
+       { players = [ loser1; loser2; winner1; loser3 ]; board = []; deck = [] }
+     in
+     "returns winner on >1 player list 1 winner not at front" >:: fun _ ->
+     assert_equal (Some winner1) (Game.check_win game));
     (*special test case: this may not happen depending on code implementation*)
-    ( let game={ players=[loser1; winner2; loser2; winner1; loser3]; board=[]; deck=[] } in 
-      "returns frontmost winner on >1 player list >1 winner" >:: fun _ ->
-      assert_equal (Some winner2) (Game.check_win game) );
+    (let game =
+       {
+         players = [ loser1; winner2; loser2; winner1; loser3 ];
+         board = [];
+         deck = [];
+       }
+     in
+     "returns frontmost winner on >1 player list >1 winner" >:: fun _ ->
+     assert_equal (Some winner2) (Game.check_win game));
     (*active_player tests*)
-    ( let game={ players=[winner1]; board=[]; deck=[] } in 
-      "single player list returns only player" >:: fun _ -> 
-      assert_equal winner1 (Game.active_player game) );
-    ( let game={ players=[winner1;winner2;loser1]; board=[]; deck=[] } in 
-      "multi player list returns first player" >:: fun _ -> 
-      assert_equal winner1 (Game.active_player game) );
-    ( let rec all_active state =
-        match state.players with 
-        | [] -> []
-        | h::t -> 
-          (Game.active_player { players=(h::t); board=state.board; deck=state.deck; }) ::
-          (all_active { players=t; board=state.board; deck=state.deck; })
-      in let all_players = [winner1; winner2; loser1; loser2; loser3]
-      in let game=
-        { 
-          players= all_players; 
-          board=[]; deck=[] 
-        } 
-      in "running active_player on all players" >:: fun _ -> 
-      assert_equal all_players (all_active game) );
+    (let game = { players = [ winner1 ]; board = []; deck = [] } in
+     "single player list returns only player" >:: fun _ ->
+     assert_equal winner1 (Game.active_player game));
+    (let game =
+       { players = [ winner1; winner2; loser1 ]; board = []; deck = [] }
+     in
+     "multi player list returns first player" >:: fun _ ->
+     assert_equal winner1 (Game.active_player game));
+    (let rec all_active state =
+       match state.players with
+       | [] -> []
+       | h :: t ->
+           Game.active_player
+             { players = h :: t; board = state.board; deck = state.deck }
+           :: all_active { players = t; board = state.board; deck = state.deck }
+     in
+     let all_players = [ winner1; winner2; loser1; loser2; loser3 ] in
+     let game = { players = all_players; board = []; deck = [] } in
+     "running active_player on all players" >:: fun _ ->
+     assert_equal all_players (all_active game));
   ]
 
 let model_helper_tests =
