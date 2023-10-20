@@ -89,47 +89,42 @@ let rec get_player_names n : string list =
     let _ = print_newline () in
     name :: get_player_names (n - 1)
 
-(*let tile_of_string (str : string) : tile =
-  let n = String.make 1 (str.[0]) in
-  let c = String.make 1 (str.[1]) in
-  match str with 
-  | “JJ” -> Joker
-  | _ -> if ()
-    match c with
-      | “Y” -> Num {num = int_of_string n; color = Yellow}
-      | “R” -> Num {num = int_of_string n; color = Red}
-      | “K” -> Num {num = int_of_string n; color = Black}
-      | “B” -> Num {num = int_of_string n; color = Blue}*)
+let rec add_input (p : player) =
+  let n = List.length p.hand - 1 in
+  let _ =
+    print_endline ("enter index of tile you want to add: 0-" ^ string_of_int n)
+  in
+  let idx = get_int () in
+  if idx < 0 || idx > n then
+    let _ =
+      print_endline
+        "this is an invalid index;\n  please enter a new, valid index: "
+    in
+    add_input p
+  else idx
 
-
-let a_input (b : tile list list) : tile list list = 
-  let _ = print_endline ("what tile do you want to add?") in
-  let t = read_line () in
-  let _ = print_endline ("which group of tiles do you want to add to? 
-          (enter row number corresponding with group)") in 
-  let row = int_of_string (read_line ()) in
-  let _ = print_endline ("where in the group of tile do you want to add to? 
-          (enter number corresponding with position)") in
-  let idx = int_of_string (read_line ()) in
-  (Board.add b t (row - 1, idx - 1))
-  
-let n_input (b : tile list list) : bool = 
-  let _ = print_endline ("what tile do you want to add?") in false
-
-
-let rec turn (b: tile list list) : bool = 
-  let s = read_line () in
-  match s with
-  | "a" -> let _ = print_endline ("you have chosen to add a tile") in 
-    let board = a_input b in 
-    let _ = CLIPrinter.show_turn in turn board
-  | "n" -> let _ = print_endline ("you have chosen to add a new row") in false
-  | "m" -> let _ = print_endline ("you have chosen to move a tile") in false
-  | "e" -> let _ = print_endline ("you have chosen to end your turn") in 
-    Board.check b
-  | "h" -> let _ = print_endline ("you have chosen to get help") in false 
-  |  _ -> let _ = print_endline ("invalid input. please enter a valid input") in 
-    turn b
+let rec turn (game : game_state) : game_state =
+  let _ = CLIPrinter.show_turn game in
+  let player = Game.active_player game in
+  let new_game =
+    match read_line () with
+    | "a" ->
+        let t_idx = add_input player in
+        let tile, new_hand = Model.remove t_idx player.hand in
+        let loc = get_new_tile_loc game.board in
+        let new_board = Board.add game.board tile loc in
+        let new_players =
+          { player with hand = new_hand } :: List.tl game.players
+        in
+        { game with players = new_players; board = new_board }
+    | "m" -> game
+    | "e" -> game
+    | "h" -> game
+    | _ ->
+        let _ = print_endline "invalid input, try again." in
+        turn game
+  in
+  turn new_game
 
 (*game starts here*)
 
