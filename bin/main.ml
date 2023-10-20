@@ -103,12 +103,16 @@ let rec add_input (p : player) =
     add_input p
   else idx
 
-let rec turn (game : game_state) : game_state =
+let rec turn (game : game_state) (start_state : game_state) (move : int) :
+    game_state =
+  (*add a move counter argument to track whether its the first move or not*)
   let _ = CLIPrinter.show_turn game in
   let player = Game.active_player game in
-  let new_game =
+  let new_game, new_move =
     match read_line () with
     | "a" ->
+        (*extra draw branch added which is only available on the first move,
+          move counter resets with invalid board at check_board *)
         let t_idx = add_input player in
         let tile, new_hand = Model.remove t_idx player.hand in
         let loc = get_new_tile_loc game.board in
@@ -116,15 +120,22 @@ let rec turn (game : game_state) : game_state =
         let new_players =
           { player with hand = new_hand } :: List.tl game.players
         in
-        { game with players = new_players; board = new_board }
-    | "m" -> game
-    | "e" -> game
-    | "h" -> game
-    | _ ->
-        let _ = print_endline "invalid input, try again." in
-        turn game
+        ({ game with players = new_players; board = new_board }, move + 1)
+    | "m" ->
+        ( game,
+          move + 1 (*create new game state with new board, updated player hand*)
+        )
+    | "e" -> (game, move + 1 (*this branch is already correct*))
+    | "h" ->
+        (game, move + 1 (*display help menu, then turn on the same game state*))
+    | "r" -> (start_state, 0)
+    | _ -> (start_state, 0)
   in
-  turn new_game
+
+  (*check board, win goes here before calling turn on the new game*)
+  (*check board when turn is ended.. if fail reset move counter and call turn on
+    first game state*)
+  turn new_game start_state new_move
 
 (*game starts here*)
 
