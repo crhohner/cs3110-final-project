@@ -62,7 +62,7 @@ let rec get_new_tile_loc (board : tile list list) =
   let row_idx = get_int () in
   if row_idx < 0 || row_idx > List.length board then
     let _ = print_endline "invalid row given, try again" in
-    get_tile_loc board
+    get_new_tile_loc board
   else
     let row = List.nth board row_idx in
     print_endline ("enter index #: 0-" ^ string_of_int (List.length row));
@@ -71,7 +71,7 @@ let rec get_new_tile_loc (board : tile list list) =
     if tile_idx >= 0 && tile_idx <= List.length row then loc
     else
       let _ = print_endline "invalid index given, try again" in
-      get_tile_loc board
+      get_new_tile_loc board
 
 (** Returns a list of [n] player names given from the command line. Will
     substitute empty names with "player[n]" for the [n]th player. *)
