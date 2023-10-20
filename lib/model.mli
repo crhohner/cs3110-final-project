@@ -40,14 +40,6 @@ module type BoardType = sig
   (*Representation type*)
   type t = tile list list
 
-  val valid_get_loc : tile list list -> int * int -> bool
-  (*Returns whether a tile on [board] at [loc] exists: so whether loc is an
-    existing position on the board.*)
-
-  val valid_set_loc : tile list list -> int * int -> bool
-  (*Returns whether a tile can be placed at [loc] on [board]. (length, 0) makes
-    a new row. *)
-
   val add : t -> tile -> int * int -> t
   (**Returns a board with one tile added, given a board [board], a tile [tile],
      a location [loc] in the form (row, index)*)
@@ -66,6 +58,14 @@ module type BoardType = sig
 
   val check_first : t -> bool
   (**Returns whether a board configuration is valid, given a board [board]*)
+
+  val valid_get_loc : tile list list -> int * int -> bool
+  (**Returns whether a tile on [board] at [loc] exists: so whether loc is an
+     existing position on the board.*)
+
+  val valid_set_loc : tile list list -> int * int -> bool
+  (**Returns whether a tile can be placed at [loc] on [board]. (length, 0) makes
+     a new row. *)
 end
 
 module Board : BoardType
