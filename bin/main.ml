@@ -39,7 +39,8 @@ let tokenize (s : string) =
 
   List.rev (aux s [] "")
 
-(* will restart entire query process if either row or index are incorrect*)
+(** Returns a valid location of a desired tile in the board. Will restart entire 
+    query process if either row or index are incorrect. *)
 let rec get_tile_loc (board : tile list list) =
   print_endline ("enter row #: 0-" ^ string_of_int (List.length board - 1));
   let row_idx = get_int () in
@@ -56,7 +57,8 @@ let rec get_tile_loc (board : tile list list) =
       let _ = print_endline "invalid index given, try again" in
       get_tile_loc board
 
-(* will restart entire query process if either row or index are incorrect*)
+(** Returns a valid location to place a new tile into the board. Will restart 
+    entire query process if either row or index are incorrect. *)
 let rec get_new_tile_loc (board : tile list list) =
   print_endline ("enter row #: 0-" ^ string_of_int (List.length board));
   let row_idx = get_int () in
@@ -89,6 +91,8 @@ let rec get_player_names n : string list =
     let _ = print_newline () in
     name :: get_player_names (n - 1)
 
+(** Returns a valid location for the tile that a player wishes to select from their
+    hand and add to the board. Will restart query process if index is incorrect. *)
 let rec add_input (p : player) =
   let n = List.length p.hand - 1 in
   let _ =
@@ -106,11 +110,13 @@ let rec add_input (p : player) =
 let rec turn (game : game_state) (start_state : game_state) (move : int) :
     game_state =
   (*add a move counter argument to track whether its the first move or not*)
-  let _ = CLIPrinter.show_turn game in
+  (*I think we will also need to track num of players so that we can tell first 
+     move for each individual player as commented below*)
+  let _ = CLIPrinter.show_turn game move in
   let player = Game.active_player game in
   let new_game, new_move =
     match read_line () with
-    | "a" ->
+    | "a" when move (*/numplayers*) > 0 ->
         (*extra draw branch added which is only available on the first move,
           move counter resets with invalid board at check_board *)
         let t_idx = add_input player in
@@ -129,6 +135,13 @@ let rec turn (game : game_state) (start_state : game_state) (move : int) :
     | "h" ->
         (game, move + 1 (*display help menu, then turn on the same game state*))
     | "r" -> (start_state, 0)
+    | "d" when move (*/numplayers*) = 0 -> 
+      let rand_tile = game.deck |> List.length |> Random.int in
+      let tile, new_deck = Model.remove rand_tile game.deck in
+      let new_players =
+        { player with hand = tile::(player.hand) } :: List.tl game.players
+      in
+      ({ game with players = new_players }, move + 1)
     | _ -> (start_state, 0)
   in
 
@@ -176,4 +189,4 @@ let _ =
 let _ = print_newline ()
 
 (*can uncomment below to see the first player's hand for funsies*)
-let _ = CLIPrinter.show_turn game
+let _ = CLIPrinter.show_turn game 0

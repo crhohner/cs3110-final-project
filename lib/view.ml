@@ -5,7 +5,7 @@ module type ViewType = sig
   val clear : int -> unit
   val show_hand : player -> unit
   val show_win : game_state -> player -> unit
-  val show_turn : game_state -> unit
+  val show_turn : game_state -> int -> unit
   val show_help : unit -> unit
   val string_of_tile : tile -> string
   val string_of_row : tile list -> string
@@ -95,12 +95,16 @@ module CLIPrinter : ViewType = struct
     | [] -> raise (Failure "1 or fewer players")
     | _ :: t -> print_endline (aux t "")
 
-  let show_actions () =
+  let show_actions (nmove : int) () =
     print_endline
-      "actions: add to row (a) | start new row (n) | move (m) | end turn (e) | \
-       help (h) "
+      (if nmove > 0 then 
+        "actions: add to row (a) | start new row (n) | move (m) | \
+        end turn (e) | help (h)"
+      else 
+        "actions: add to row (a) | draw from deck (d) | move (m) | \
+        end turn (e) | help (h)")
 
-  let show_turn (state : game_state) : unit =
+  let show_turn (state : game_state) (nmove: int) : unit =
     print_bar state;
     print_hand_sizes state;
     print_bar state;
@@ -110,7 +114,7 @@ module CLIPrinter : ViewType = struct
     print_endline (active.name ^ "'s hand:");
     show_hand active;
     print_bar state;
-    show_actions ();
+    show_actions nmove ();
     print_bar state
 
   let show_win (state : game_state) (player : player) =
