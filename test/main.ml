@@ -549,7 +549,7 @@ let game_tests =
      assert_equal true (cmp full entire_deck));
     (* unit tests of next_player using make *)
     (*check_win tests*)
-    (let game = { players = []; board = []; deck = [] } in
+    (** (let game = { players = []; board = []; deck = [] } in
      "returns None on empty player list" >:: fun _ ->
      assert_equal None (Game.check_win game));
     (let game = { players = [ winner1 ]; board = []; deck = [] } in
@@ -583,7 +583,7 @@ let game_tests =
        }
      in
      "returns frontmost winner on >1 player list >1 winner" >:: fun _ ->
-     assert_equal (Some winner2) (Game.check_win game));
+     assert_equal (Some winner2) (Game.check_win game)); *)
     (*active_player tests*)
     (let game = { players = [ winner1 ]; board = []; deck = [] } in
      "single player list returns only player" >:: fun _ ->

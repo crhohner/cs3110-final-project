@@ -60,12 +60,13 @@ let rec get_tile_loc (board : tile list list) =
 (** Returns a valid location to place a new tile into the board. Will restart 
     entire query process if either row or index are incorrect. *)
 let rec get_new_tile_loc (board : tile list list) =
-  print_endline ("enter row #: 0-" ^ string_of_int (List.length board));
+  let len = List.length board in
+  print_endline ("enter row #: 0-" ^ string_of_int (len));
   let row_idx = get_int () in
-  if row_idx < 0 || row_idx > List.length board then
+  if row_idx < 0 || row_idx > len then
     let _ = print_endline "invalid row given, try again" in
     get_new_tile_loc board
-  else
+  else if row_idx = len then (len, 0) else 
     let row = List.nth board row_idx in
     print_endline ("enter index #: 0-" ^ string_of_int (List.length row));
     let tile_idx = get_int () in
@@ -107,16 +108,19 @@ let rec add_input (p : player) =
     add_input p
   else idx
 
-let rec turn (game : game_state) (start_state : game_state) (move : int) :
+type move_type = First | Normal | Last 
+
+let rec turn (game : game_state) (start_state : game_state) (move : int) (is_first_turn : bool) :
     game_state =
-  (*add a move counter argument to track whether its the first move or not*)
+  
+    (*add a move counter argument to track whether its the first move or not*)
   (*I think we will also need to track num of players so that we can tell first 
      move for each individual player as commented below*)
   let _ = CLIPrinter.show_turn game move in
   let player = Game.active_player game in
   let new_game, new_move =
     match read_line () with
-    | "a" when move (*/numplayers*) > 0 ->
+    | "a"  ->
         (*extra draw branch added which is only available on the first move,
           move counter resets with invalid board at check_board *)
         let t_idx = add_input player in
@@ -128,27 +132,43 @@ let rec turn (game : game_state) (start_state : game_state) (move : int) :
         in
         ({ game with players = new_players; board = new_board }, move + 1)
     | "m" ->
-        ( game,
-          move + 1 (*create new game state with new board, updated player hand*)
-        )
-    | "e" -> (game, move + 1 (*this branch is already correct*))
+        let b = game.board in 
+        let old_loc = get_tile_loc b in
+        let new_loc = get_new_tile_loc b in
+        let new_board = List.filter (fun x -> if x = [] then false else true) 
+        (Board.move b old_loc new_loc) in
+        ({game with board = new_board}, move + 1)
+    | "e" -> (Game.next_player game, 0 (*this branch is already correct*))
     | "h" ->
-        (game, move + 1 (*display help menu, then turn on the same game state*))
+        (game, move (*display help menu, then turn on the same game state*))
     | "r" -> (start_state, 0)
-    | "d" when (move (*/numplayers*) = 0) && (List.length game.deck > 0)-> 
+    | "d" when (move = 0) && (List.length game.deck > 0)-> 
       let rand_tile = game.deck |> List.length |> Random.int in
       let tile, new_deck = Model.remove rand_tile game.deck in
       let new_players =
         { player with hand = tile::(player.hand) } :: List.tl game.players
       in
-      ({ game with players = new_players; deck = new_deck }, move + 1)
+      (Game.next_player { game with players = new_players; deck = new_deck }, 0)
     | _ -> (start_state, 0)
   in
+
+  (if new_move = 0 then 
+    (let board_valid = Board.check new_game.board in 
+    (if board_valid then 
+      (if Game.check_win player then 
+      let _ = CLIPrinter.show_win new_game player in new_game 
+      else turn new_game new_game 0 false)
+    else turn (start_state) (start_state) 0 false))
+  else turn new_game start_state new_move false)
+  (*if is_first_turn then 
+    (let board_valid = Board.check_first new_game.board in
+    (if board_valid then turn new_game game 0 false
+     else turn new_game game 0 true)) 
+  else THIS WILL BE IMPLEMENTED IN MS3*)
 
   (*check board, win goes here before calling turn on the new game*)
   (*check board when turn is ended.. if fail reset move counter and call turn on
     first game state*)
-  turn new_game start_state new_move
 
 (*game starts here*)
 
@@ -188,5 +208,4 @@ let _ =
 
 let _ = print_newline ()
 
-(*can uncomment below to see the first player's hand for funsies*)
-let _ = CLIPrinter.show_turn game 0
+let _ = turn game game 0 false

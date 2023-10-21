@@ -34,7 +34,7 @@ module CLIPrinter : ViewType = struct
       | h :: t ->
           let acc = acc ^ string_of_tile h ^ " " in
           aux t acc
-      | [] -> raise (Failure "what even")
+      | [] -> acc
     in
     aux row ""
 
@@ -99,10 +99,10 @@ module CLIPrinter : ViewType = struct
   let show_actions (game : game_state) (nmoves : int) ()=
     print_endline
       (if nmoves = 0 && (List.length game.deck) > 0 then 
-        "actions: add to row (a) | start new row (n) | move (m) | \
-        end turn (e) | help (h)"
-      else 
         "actions: add to row (a) | draw from deck (d) | move (m) | \
+        help (h)"
+      else 
+        "actions: add to row (a) | move (m) | \
         end turn (e) | help (h)")
 
   let show_turn (state : game_state) (nmove: int) : unit =

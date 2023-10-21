@@ -277,7 +277,7 @@ end
 (** A GameType represents the whole state of a Rummikaml game *)
 module type GameType = sig
   val next_player : game_state -> game_state
-  val check_win : game_state -> player option
+  val check_win : player -> bool
   val make : string list -> game_state
   val active_player : game_state -> player
 end
@@ -292,16 +292,9 @@ module Game : GameType = struct
     in
     { state with players = next_lst }
 
-  (* Function checks if a player has won (no more tiles) - currently iterates
-     through entire list of players rather than simply checking the current
-     player. Depends on how often we run check_win *)
-  let rec check_win (state : game_state) : player option =
-    let rec empty_hand (lst : player list) : player option =
-      match lst with
-      | [] -> None
-      | h :: t -> if h.hand = [] then Some h else empty_hand t
-    in
-    empty_hand state.players
+  (* Function checks if given player has won (no more tiles) *)
+  let check_win (p : player) : bool = 
+    p.hand = []
 
   (* Helper for make function used to create a complete deck of tiles *)
   let rec create_deck (n : int) (lst : tile list) : tile list =

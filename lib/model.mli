@@ -76,8 +76,8 @@ module type GameType = sig
   (**Returns a game state [state] with the previous head/player moved to the end
      of the queue in [state.players] *)
 
-  val check_win : game_state -> player option
-  (**Returns whether a player has one the game, returns the winner or [None]*)
+  val check_win : player -> bool
+  (**Returns whether given player has won the game, returns a bool *)
 
   val make : string list -> game_state
   (**Returns an initial game state before the first move, created from a list of
