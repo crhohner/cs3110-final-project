@@ -135,13 +135,13 @@ let rec turn (game : game_state) (start_state : game_state) (move : int) :
     | "h" ->
         (game, move + 1 (*display help menu, then turn on the same game state*))
     | "r" -> (start_state, 0)
-    | "d" when move (*/numplayers*) = 0 -> 
+    | "d" when (move (*/numplayers*) = 0) && (List.length game.deck > 0)-> 
       let rand_tile = game.deck |> List.length |> Random.int in
       let tile, new_deck = Model.remove rand_tile game.deck in
       let new_players =
         { player with hand = tile::(player.hand) } :: List.tl game.players
       in
-      ({ game with players = new_players }, move + 1)
+      ({ game with players = new_players; deck = new_deck }, move + 1)
     | _ -> (start_state, 0)
   in
 

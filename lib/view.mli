@@ -14,7 +14,7 @@ module type ViewType = sig
   val show_win : game_state -> player -> unit
   (**Returns Displays a win message at the end of the game. *)
 
-  val show_turn : game_state -> int -> unit
+  val show_turn : game_state -> int  -> unit
   (**Returns Displays the board, current player's hand, and available actions. *)
 
   val show_help : unit -> unit

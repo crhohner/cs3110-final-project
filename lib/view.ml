@@ -95,9 +95,10 @@ module CLIPrinter : ViewType = struct
     | [] -> raise (Failure "1 or fewer players")
     | _ :: t -> print_endline (aux t "")
 
-  let show_actions (nmove : int) () =
+  (* check is the sum of the move and deck length*)
+  let show_actions (game : game_state) (nmoves : int) ()=
     print_endline
-      (if nmove > 0 then 
+      (if nmoves = 0 && (List.length game.deck) > 0 then 
         "actions: add to row (a) | start new row (n) | move (m) | \
         end turn (e) | help (h)"
       else 
@@ -114,7 +115,7 @@ module CLIPrinter : ViewType = struct
     print_endline (active.name ^ "'s hand:");
     show_hand active;
     print_bar state;
-    show_actions nmove ();
+    show_actions state nmove ();
     print_bar state
 
   let show_win (state : game_state) (player : player) =
