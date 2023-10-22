@@ -120,11 +120,12 @@ let rec add_input (p : player) =
   else idx
 
 let rec turn (curr : game_state) (prev : game_state) =
-  if Board.check curr.board && Game.active_player curr |> Game.check_win then
-    curr
+  let _ = CLIPrinter.clear 20 in
+  let player = Game.active_player curr in
+  if Board.check curr.board && Game.check_win player = true then curr
   else
     let _ = CLIPrinter.show_turn curr (prev <> curr) in
-    let player = Game.active_player curr in
+
     match read_line () with
     | "a" ->
         let i = add_input player in
@@ -156,7 +157,10 @@ let rec turn (curr : game_state) (prev : game_state) =
         let new_players =
           { player with hand = tile :: player.hand } :: List.tl curr.players
         in
-        Game.next_player { curr with players = new_players; deck = new_deck }
+        let next =
+          Game.next_player { curr with players = new_players; deck = new_deck }
+        in
+        turn next next
     | "r" when curr <> prev -> turn prev prev
     | "e" when curr <> prev ->
         if Board.check curr.board then
@@ -187,7 +191,6 @@ let _ =
     \          |||        |||\n\
     \         //_(       //_("
 
-let newlines = 20
 let _ = print_endline "welcome to rummikaml! \n"
 let _ = print_endline "let's get going. how many players?"
 let player_count = get_player_count ()

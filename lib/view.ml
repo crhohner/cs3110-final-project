@@ -51,7 +51,7 @@ module CLIPrinter : ViewType = struct
     match lines with
     | 0 -> ()
     | _ ->
-        let _ = print_newline in
+        let _ = print_newline () in
         clear (lines - 1)
 
   let show_hand (player : player) : unit =
@@ -76,7 +76,7 @@ module CLIPrinter : ViewType = struct
      of that length, otherwise prints an 80-character bar.*)
   let print_bar (state : game_state) =
     let len = longest_row state.board in
-    let count = if len < 80 then 80 else len in
+    let count = if len < 82 then 82 else len in
     print_endline (make_repeats "—" count)
 
   (**Displays how many tiles every player has in their hands except for how many
