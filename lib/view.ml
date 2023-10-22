@@ -57,15 +57,6 @@ module CLIPrinter : ViewType = struct
   let show_hand (player : player) : unit =
     print_endline (string_of_row player.hand)
 
-  (**Returns the length of the string representation of the longest row (in
-     terms of its representation) on the board [board].*)
-  let rec longest_row board =
-    List.fold_left
-      (fun max row ->
-        let check = String.length (string_of_row row) in
-        if check > max then check else max)
-      0 board
-
   (**Returns a string with [n] repeats of [char]. *)
   let rec make_repeats char n =
     let rec aux n acc = if n = 0 then acc else aux (n - 1) char ^ acc in
@@ -76,7 +67,10 @@ module CLIPrinter : ViewType = struct
      of that length, otherwise prints an 80-character bar.*)
   let print_bar (state : game_state) =
     (* len always evaluates to 0 *)
-    let len = longest_row state.board in
+    let len =
+      let p = Game.active_player state in
+      String.length (string_of_row p.hand)
+    in
     let count = if len < 82 then 82 else len in
     print_endline (make_repeats "—" count)
 
