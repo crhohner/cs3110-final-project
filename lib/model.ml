@@ -76,10 +76,12 @@ module Board : BoardType with type t = tile list list = struct
     position or take a tile from an invalid position.*)
   let move (board : tile list list) (startLoc : int * int) (endLoc : int * int)
       : tile list list =
-    let row = List.nth board (fst startLoc) in
+    let row = List.nth board (fst startLoc) in 
     let tile, new_row = remove (snd startLoc) row in
+    let new_end = (if snd endLoc > snd startLoc 
+    && fst startLoc = fst endLoc then snd endLoc - 1 else snd endLoc) in
     let mid_board = replace new_row board (fst startLoc) in
-    add mid_board tile endLoc
+    add mid_board tile (fst endLoc, new_end)
 
   let valid_get_loc (board : tile list list) (loc : int * int) : bool =
     if fst loc < 0 || snd loc < 0 then false

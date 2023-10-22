@@ -125,6 +125,7 @@ module CLIPrinter : ViewType = struct
     print_bar state
 
   let show_win (state : game_state) =
+    show_board state;
     print_endline
       (let player = Game.active_player state in
        player.name ^ " wins!")

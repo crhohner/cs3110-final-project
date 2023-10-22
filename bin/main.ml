@@ -163,11 +163,13 @@ let rec turn (curr : game_state) (prev : game_state) =
         turn next next
     | "r" when curr <> prev -> turn prev prev
     | "e" when curr <> prev ->
-        if Board.check curr.board then
+        if Board.check curr.board && 
+          (let init_player = Game.active_player prev in 
+          player.hand <> init_player.hand) then
           let next = Game.next_player curr in
           turn next next
         else
-          let _ = print_endline "\ninvalid board, resetting turn\n" in
+          let _ = print_endline "\ninvalid turn, resetting turn\n" in
           turn prev prev
     | _ ->
         let _ = print_endline "\ninvalid input\n" in
