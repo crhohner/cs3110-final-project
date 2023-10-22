@@ -76,10 +76,13 @@ module Board : BoardType with type t = tile list list = struct
     position or take a tile from an invalid position.*)
   let move (board : tile list list) (startLoc : int * int) (endLoc : int * int)
       : tile list list =
-    let row = List.nth board (fst startLoc) in 
+    let row = List.nth board (fst startLoc) in
     let tile, new_row = remove (snd startLoc) row in
-    let new_end = (if snd endLoc > snd startLoc 
-    && fst startLoc = fst endLoc then snd endLoc - 1 else snd endLoc) in
+    let new_end =
+      if fst startLoc = fst endLoc && snd endLoc = List.length row then
+        snd endLoc - 1
+      else snd endLoc
+    in
     let mid_board = replace new_row board (fst startLoc) in
     add mid_board tile (fst endLoc, new_end)
 
@@ -295,8 +298,7 @@ module Game : GameType = struct
     { state with players = next_lst }
 
   (* Function checks if given player has won (no more tiles) *)
-  let check_win (p : player) : bool = 
-    p.hand = []
+  let check_win (p : player) : bool = p.hand = []
 
   (* Helper for make function used to create a complete deck of tiles *)
   let rec create_deck (n : int) (lst : tile list) : tile list =
