@@ -134,7 +134,9 @@ let rec turn (curr : game_state) (prev : game_state) =
         let new_board =
           if curr.board = [] then [ [ tile ] ]
           else
-            let _ = print_string ((CLIPrinter.string_of_tile selected) ^ " selected! ") in
+            let _ =
+              print_string (CLIPrinter.string_of_tile selected ^ " selected! ")
+            in
             let loc = get_new_tile_loc curr.board in
             Board.add curr.board tile loc
         in
@@ -145,9 +147,15 @@ let rec turn (curr : game_state) (prev : game_state) =
     | "m" ->
         let _ = print_endline "which tile do you want to move?" in
         let start_loc = get_tile_loc curr.board in
-        let selected = List.nth (List.nth curr.board (fst start_loc)) (snd start_loc) in
-        let _ = print_endline ("where do you want to move " ^ 
-          (CLIPrinter.string_of_tile selected) ^ " to?") in
+        let selected =
+          List.nth (List.nth curr.board (fst start_loc)) (snd start_loc)
+        in
+        let _ =
+          print_endline
+            ("where do you want to move "
+            ^ CLIPrinter.string_of_tile selected
+            ^ " to?")
+        in
         let end_loc = get_new_tile_loc curr.board in
         let new_board =
           List.filter
@@ -167,14 +175,21 @@ let rec turn (curr : game_state) (prev : game_state) =
         turn next next
     | "r" when curr <> prev -> turn prev prev
     | "e" when curr <> prev ->
-        if Board.check curr.board && 
-          (let init_player = Game.active_player prev in 
-          player.hand <> init_player.hand) then
+        if
+          Board.check curr.board
+          &&
+          let init_player = Game.active_player prev in
+          player.hand <> init_player.hand
+        then
           let next = Game.next_player curr in
           turn next next
         else
           let _ = print_endline "\ninvalid turn, resetting turn\n" in
           turn prev prev
+    | "h" ->
+        let _ = CLIPrinter.clear 5 in
+        let _ = CLIPrinter.show_help () in
+        turn curr prev
     | _ ->
         let _ = print_endline "\ninvalid input\n" in
         turn curr prev

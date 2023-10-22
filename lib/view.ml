@@ -28,11 +28,11 @@ module CLIPrinter : ViewType = struct
         "[" ^ string_of_int n.num ^ color ^ "]"
 
   let string_of_row (row : tile list) : string =
-    let rec aux (row : tile list) (acc : string) (ntile : int)=
+    let rec aux (row : tile list) (acc : string) (ntile : int) =
       match row with
-      | h :: [] -> acc ^ (string_of_int ntile) ^ ":" ^ string_of_tile h
+      | h :: [] -> acc ^ string_of_int ntile ^ ":" ^ string_of_tile h
       | h :: t ->
-          let acc = acc ^ (string_of_int ntile) ^ ":" ^ string_of_tile h ^ " " in
+          let acc = acc ^ string_of_int ntile ^ ":" ^ string_of_tile h ^ " " in
           aux t acc (ntile + 1)
       | [] -> acc
     in
@@ -131,5 +131,13 @@ module CLIPrinter : ViewType = struct
       (let player = Game.active_player state in
        player.name ^ " wins!")
 
-  let show_help () = failwith "u"
+  let show_help () =
+    print_endline
+      "help: \n\
+      \ \t - add to row (a): add a tile from your hand to the board \n\
+      \ \t - move tile (m): move a tile on the board \n\
+      \ \t - draw from deck (d): draw a tile, ends your turn \n\
+      \ \t - reset turn (r): reset your current turn \n\
+      \ \t - draw from deck (d): end your turn \n\n\
+       rules: visit https://rummikub.com/rules/\n"
 end
