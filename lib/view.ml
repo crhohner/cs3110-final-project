@@ -28,15 +28,15 @@ module CLIPrinter : ViewType = struct
         "[" ^ string_of_int n.num ^ color ^ "]"
 
   let string_of_row (row : tile list) : string =
-    let rec aux (row : tile list) (acc : string) =
+    let rec aux (row : tile list) (acc : string) (ntile : int)=
       match row with
-      | h :: [] -> acc ^ string_of_tile h
+      | h :: [] -> acc ^ (string_of_int ntile) ^ ":" ^ string_of_tile h
       | h :: t ->
-          let acc = acc ^ string_of_tile h ^ " " in
-          aux t acc
+          let acc = acc ^ (string_of_int ntile) ^ ":" ^ string_of_tile h ^ " " in
+          aux t acc (ntile + 1)
       | [] -> acc
     in
-    aux row ""
+    aux row "" 0
 
   let show_board (state : game_state) : unit =
     match state.board with
@@ -75,6 +75,7 @@ module CLIPrinter : ViewType = struct
      If the longest row on the board if longer than 80 characters, prints a bar
      of that length, otherwise prints an 80-character bar.*)
   let print_bar (state : game_state) =
+    (* len always evaluates to 0 *)
     let len = longest_row state.board in
     let count = if len < 82 then 82 else len in
     print_endline (make_repeats "—" count)
