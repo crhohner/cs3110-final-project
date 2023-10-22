@@ -11,11 +11,13 @@ module type ViewType = sig
   val show_hand : player -> unit
   (**Returns Prints a player [player]'s current hand. *)
 
-  val show_win : game_state -> player -> unit
+  val show_win : game_state -> unit
   (**Returns Displays a win message at the end of the game. *)
 
-  val show_turn : game_state -> int  -> unit
-  (**Returns Displays the board, current player's hand, and available actions. *)
+  val show_turn : game_state -> bool -> unit
+  (**Returns Displays the board tied to [game], current player's hand, and
+     available actions based on whether the board has been altered ([altered])
+     in the active player's turn. *)
 
   val show_help : unit -> unit
   (**Returns Displays the game's help menu. Player should need to press a key

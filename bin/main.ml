@@ -25,6 +25,15 @@ let get_int () =
          | _ -> true)
        "enter a valid integer input")
 
+let get_player_count () =
+  int_of_string
+    (get_input
+       (fun x ->
+         match int_of_string x with
+         | exception Failure s -> false
+         | n -> if n > 1 then true else false)
+       "enter a valid integer input greater than one")
+
 let tokenize (s : string) =
   let rec aux (str : string) (acc : string list) (curr : string) : string list =
     match String.get str 0 with
@@ -39,7 +48,7 @@ let tokenize (s : string) =
 
   List.rev (aux s [] "")
 
-(** Returns a valid location of a desired tile in the board. Will restart entire 
+(** Returns a valid location of a desired tile in the board. Will restart entire
     query process if either row or index are incorrect. *)
 let rec get_tile_loc (board : tile list list) =
   print_endline ("enter row #: 0-" ^ string_of_int (List.length board - 1));
@@ -57,16 +66,17 @@ let rec get_tile_loc (board : tile list list) =
       let _ = print_endline "invalid index given, try again" in
       get_tile_loc board
 
-(** Returns a valid location to place a new tile into the board. Will restart 
+(** Returns a valid location to place a new tile into the board. Will restart
     entire query process if either row or index are incorrect. *)
 let rec get_new_tile_loc (board : tile list list) =
   let len = List.length board in
-  print_endline ("enter row #: 0-" ^ string_of_int (len));
+  print_endline ("enter row #: 0-" ^ string_of_int len);
   let row_idx = get_int () in
   if row_idx < 0 || row_idx > len then
     let _ = print_endline "invalid row given, try again" in
     get_new_tile_loc board
-  else if row_idx = len then (len, 0) else 
+  else if row_idx = len then (len, 0)
+  else
     let row = List.nth board row_idx in
     print_endline ("enter index #: 0-" ^ string_of_int (List.length row));
     let tile_idx = get_int () in
@@ -92,8 +102,9 @@ let rec get_player_names n : string list =
     let _ = print_newline () in
     name :: get_player_names (n - 1)
 
-(** Returns a valid location for the tile that a player wishes to select from their
-    hand and add to the board. Will restart query process if index is incorrect. *)
+(** Returns a valid location for the tile that a player wishes to select from
+    their hand and add to the board. Will restart query process if index is
+    incorrect. *)
 let rec add_input (p : player) =
   let n = List.length p.hand - 1 in
   let _ =
@@ -108,69 +119,55 @@ let rec add_input (p : player) =
     add_input p
   else idx
 
-type move_type = First | Normal | Last 
-
-let rec turn (game : game_state) (start_state : game_state) (move : int) (is_first_turn : bool) :
-    game_state =
-  
-    (*add a move counter argument to track whether its the first move or not*)
-  (*I think we will also need to track num of players so that we can tell first 
-     move for each individual player as commented below*)
-  let _ = CLIPrinter.show_turn game move in
-  let player = Game.active_player game in
-  let new_game, new_move =
+let rec turn (curr : game_state) (prev : game_state) =
+  if Board.check curr.board && Game.active_player curr |> Game.check_win then
+    curr
+  else
+    let _ = CLIPrinter.show_turn curr (prev <> curr) in
+    let player = Game.active_player curr in
     match read_line () with
-    | "a"  ->
-        (*extra draw branch added which is only available on the first move,
-          move counter resets with invalid board at check_board *)
-        let t_idx = add_input player in
-        let tile, new_hand = Model.remove t_idx player.hand in
-        let loc = get_new_tile_loc game.board in
-        let new_board = Board.add game.board tile loc in
-        let new_players =
-          { player with hand = new_hand } :: List.tl game.players
+    | "a" ->
+        let i = add_input player in
+        let tile, new_hand = remove i player.hand in
+        let new_board =
+          if curr.board = [] then [ [ tile ] ]
+          else
+            let loc = get_new_tile_loc curr.board in
+            Board.add curr.board tile loc
         in
-        ({ game with players = new_players; board = new_board }, move + 1)
+        let new_players =
+          { player with hand = new_hand } :: List.tl curr.players
+        in
+        turn { curr with board = new_board; players = new_players } prev
     | "m" ->
-        let b = game.board in 
-        let old_loc = get_tile_loc b in
-        let new_loc = get_new_tile_loc b in
-        let new_board = List.filter (fun x -> if x = [] then false else true) 
-        (Board.move b old_loc new_loc) in
-        ({game with board = new_board}, move + 1)
-    | "e" -> (Game.next_player game, 0 (*this branch is already correct*))
-    | "h" ->
-        (game, move (*display help menu, then turn on the same game state*))
-    | "r" -> (start_state, 0)
-    | "d" when (move = 0) && (List.length game.deck > 0)-> 
-      let rand_tile = game.deck |> List.length |> Random.int in
-      let tile, new_deck = Model.remove rand_tile game.deck in
-      let new_players =
-        { player with hand = tile::(player.hand) } :: List.tl game.players
-      in
-      (Game.next_player { game with players = new_players; deck = new_deck }, 0)
-    | _ -> (start_state, 0)
-  in
-
-  (if new_move = 0 then 
-    (let board_valid = Board.check new_game.board in 
-    (if board_valid then 
-      (if Game.check_win player then 
-      let _ = CLIPrinter.show_win new_game player in new_game 
-      else turn new_game new_game 0 false)
-    else turn (start_state) (start_state) 0 false))
-  else turn new_game start_state new_move false)
-  (*if is_first_turn then 
-    (let board_valid = Board.check_first new_game.board in
-    (if board_valid then turn new_game game 0 false
-     else turn new_game game 0 true)) 
-  else THIS WILL BE IMPLEMENTED IN MS3*)
-
-  (*check board, win goes here before calling turn on the new game*)
-  (*check board when turn is ended.. if fail reset move counter and call turn on
-    first game state*)
-
-(*game starts here*)
+        let _ = print_endline "which tile do you want to move?" in
+        let start_loc = get_tile_loc curr.board in
+        let _ = print_endline "where do you want to move this tile to?" in
+        let end_loc = get_new_tile_loc curr.board in
+        let new_board =
+          List.filter
+            (fun x -> if x = [] then false else true)
+            (Board.move curr.board start_loc end_loc)
+        in
+        turn { curr with board = new_board } prev
+    | "d" when curr = prev ->
+        let rand_tile = curr.deck |> List.length |> Random.int in
+        let tile, new_deck = remove rand_tile curr.deck in
+        let new_players =
+          { player with hand = tile :: player.hand } :: List.tl curr.players
+        in
+        Game.next_player { curr with players = new_players; deck = new_deck }
+    | "r" when curr <> prev -> turn prev prev
+    | "e" when curr <> prev ->
+        if Board.check curr.board then
+          let next = Game.next_player curr in
+          turn next next
+        else
+          let _ = print_endline "\ninvalid board, resetting turn\n" in
+          turn prev prev
+    | _ ->
+        let _ = print_endline "\ninvalid input\n" in
+        turn curr prev
 
 let _ = print_newline ()
 
@@ -193,7 +190,7 @@ let _ =
 let newlines = 20
 let _ = print_endline "welcome to rummikaml! \n"
 let _ = print_endline "let's get going. how many players?"
-let player_count = get_int ()
+let player_count = get_player_count ()
 let _ = print_newline ()
 let player_names = get_player_names player_count
 let game = Game.make player_names
@@ -207,5 +204,5 @@ let _ =
     ^ " goes first! let's play!")
 
 let _ = print_newline ()
-
-let _ = turn game game 0 false
+let final_state = turn game game
+let _ = CLIPrinter.show_win final_state

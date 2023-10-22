@@ -4,8 +4,8 @@ module type ViewType = sig
   val show_board : game_state -> unit
   val clear : int -> unit
   val show_hand : player -> unit
-  val show_win : game_state -> player -> unit
-  val show_turn : game_state -> int -> unit
+  val show_win : game_state -> unit
+  val show_turn : game_state -> bool -> unit
   val show_help : unit -> unit
   val string_of_tile : tile -> string
   val string_of_row : tile list -> string
@@ -96,16 +96,22 @@ module CLIPrinter : ViewType = struct
     | _ :: t -> print_endline (aux t "")
 
   (* check is the sum of the move and deck length*)
-  let show_actions (game : game_state) (nmoves : int) ()=
-    print_endline
-      (if nmoves = 0 && (List.length game.deck) > 0 then 
-        "actions: add to row (a) | draw from deck (d) | move (m) | \
-        help (h)"
-      else 
-        "actions: add to row (a) | move (m) | \
-        end turn (e) | help (h)")
+  let show_actions (game : game_state) (altered : bool) () =
+    let msg =
+      "actions: add to row (a) | help (h)"
+      ^ (if altered = true then " | end turn (e)" else "")
+      ^ (if altered = false && game.deck <> [] then " | draw from deck (d)"
+         else "")
+      ^ (match game.board with
+        | [ [ _ ] ] -> ""
+        | [] -> ""
+        | _ -> " | move tile (m)")
+      ^ if altered then " | reset turn (r)" else ""
+    in
 
-  let show_turn (state : game_state) (nmove: int) : unit =
+    print_endline msg
+
+  let show_turn (state : game_state) (altered : bool) : unit =
     print_bar state;
     print_hand_sizes state;
     print_bar state;
@@ -115,11 +121,13 @@ module CLIPrinter : ViewType = struct
     print_endline (active.name ^ "'s hand:");
     show_hand active;
     print_bar state;
-    show_actions state nmove ();
+    show_actions state altered ();
     print_bar state
 
-  let show_win (state : game_state) (player : player) =
-    print_endline (player.name ^ " wins!")
+  let show_win (state : game_state) =
+    print_endline
+      (let player = Game.active_player state in
+       player.name ^ " wins!")
 
   let show_help () = failwith "u"
 end
