@@ -8,3 +8,7 @@ test:
 
 play:
 	OCAMLRUNPARAM=b dune exec bin/main.exe
+
+zip:
+	rm -f rummikaml.zip
+	zip -r rummikaml.zip . -x@exclude.lst
