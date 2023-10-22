@@ -31,8 +31,8 @@ let get_player_count () =
        (fun x ->
          match int_of_string x with
          | exception Failure s -> false
-         | n -> if n > 1 then true else false)
-       "enter a valid integer input greater than one")
+         | n -> if n > 1 && n < 7 then true else false)
+       "enter a valid integer input 2-6")
 
 let tokenize (s : string) =
   let rec aux (str : string) (acc : string list) (curr : string) : string list =
@@ -120,7 +120,7 @@ let rec add_input (p : player) =
   else idx
 
 let rec turn (curr : game_state) (prev : game_state) =
-  let _ = CLIPrinter.clear 20 in
+  let _ = CLIPrinter.clear 5 in
   let player = Game.active_player curr in
   if Board.check curr.board && Game.check_win player = true then curr
   else
@@ -151,7 +151,7 @@ let rec turn (curr : game_state) (prev : game_state) =
             (Board.move curr.board start_loc end_loc)
         in
         turn { curr with board = new_board } prev
-    | "d" when curr = prev ->
+    | "d" when curr = prev && curr.deck <> [] ->
         let rand_tile = curr.deck |> List.length |> Random.int in
         let tile, new_deck = remove rand_tile curr.deck in
         let new_players =
