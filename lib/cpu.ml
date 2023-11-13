@@ -172,6 +172,18 @@ let check_threes_redo l =
     if List.length nums < 3 then None else None
 
 let place_three b l = b @ [ l ]
-let place_pair b l = failwith "unimplemented"
+
+let rec place_pair b l = 
+  let tile1 = List.nth l 0 in 
+  let tile2 = List.nth l 1 in
+  match b with 
+  | [] -> []
+  | h::t -> 
+    if check_threes [tile1; tile2; List.hd h] = (Some [tile1; tile2; List.hd h]) 
+      then (l @ h) :: t
+    else if check_threes [List.hd (List.rev h); tile1; tile2;] = 
+      (Some [List.hd (List.rev h); tile1; tile2;])
+      then (h @ l) :: t
+    else h::(place_pair t l)
 let place_one b t = failwith "unimplemented"
 let turn p b = failwith "unimplemented"
