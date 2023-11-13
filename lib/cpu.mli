@@ -2,10 +2,11 @@ open Model
 
 val sort_by_num : tile list -> tile list
 (** Returns cpu's hand as a list of tiles sorted first by number then color
-    (KRBY)**)
+    (YRBK)**)
 
 val sort_by_color : tile list -> tile list
-(** Returns cpu's hand as a list of tiles sorted first by color then number**)
+(** Returns cpu's hand as a list of tiles sorted first by color (YRBK) then
+    number**)
 
 val check_threes : tile list -> tile list option
 (** Checks cpu's hand for possible valid set of 3 tiles. Returns [None] if no

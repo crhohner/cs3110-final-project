@@ -17,8 +17,19 @@ let rec add_multi set lst =
   | [] -> set
   | h :: t -> add_multi (TileSet.add h set) t
 
-let sort_by_num l = failwith "unimplemented"
-let sort_by_color l = failwith "unimplemented"
+(* Helper of sort_by_num - assigns given tile to integer. *)
+let num (t : tile) : int =
+  match t with
+  | Joker -> 0
+  | Num { num = n; color = c } -> (
+      match c with
+      | Yellow -> (n * 100) + 1
+      | Red -> (n * 100) + 2
+      | Blue -> (n * 100) + 3
+      | Black -> (n * 100) + 4)
+
+let sort_by_num l = List.sort (fun t1 t2 -> num t1 - num t2) l
+let sort_by_color l = List.sort (fun t1 t2 -> num_of_tile t1 - num_of_tile t2) l
 
 let pair_in_seq t1 t2 =
   match (t1, t2) with
