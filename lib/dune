@@ -2,4 +2,4 @@
  (name rummikaml)
  (public_name Rummikaml)
  (libraries str)
- (modules_without_implementation controller cpu))
+ (modules_without_implementation controller))
