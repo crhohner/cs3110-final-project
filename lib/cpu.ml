@@ -110,7 +110,32 @@ let rec nums_list (l : tile list) =
   let first_nums = check_nums l in
   match first_nums with
   | [] -> None
-  | lst -> three_colors first_nums
+  | lst -> three_colors lst
+
+let rec check_colors l =
+  match l with
+  | t1 :: t2 :: t3 :: tail -> (
+      match (t1, t2, t3) with
+      | Num n1, Num n2, Num n3 ->
+          if n1.color = n2.color && n2.color = n3.color then [ t1; t2; t3 ]
+          else check_colors (t2 :: t3 :: tail)
+      | Joker, Num n1, Num n2 | Num n1, Joker, Num n2 | Num n1, Num n2, Joker ->
+          if n1.color = n2.color then [ t1; t2; t3 ]
+          else check_colors (t2 :: t3 :: tail)
+      | Joker, Joker, Num n | Num n, Joker, Joker | Joker, Num n, Joker ->
+          [ t1; t2; t3 ]
+      | _ -> [])
+  | _ -> []
+
+let rec colors_check (l : tile list) : tile list option =
+  let colors = check_colors l in
+  match colors with
+  | [] -> None
+  | lst -> (
+      let nums = three_nums lst in
+      match nums with
+      | None -> None
+      | Some l -> Some l)
 
 let check_threes l =
   if List.length l < 3 then None
@@ -118,15 +143,33 @@ let check_threes l =
     let sorted_num_l = sort_by_num l in
     let colors = nums_list sorted_num_l in
     match colors with
-    | None -> (
+    | None ->
         let sorted_color_l = sort_by_color l in
-        let nums = three_nums sorted_color_l in
-        match nums with
-        | None -> None
-        | _ -> nums
-        (*need to make sure it only goes for length of same color for each
-          color*))
+        colors_check sorted_color_l
     | _ -> colors
+
+let rec check_num l num =
+  match l with
+  | [] -> []
+  | h :: t -> (
+      match h with
+      | Num n -> if n.num == num then h :: check_num t num else []
+      | Joker -> h :: check_num t num)
+
+let rec num_check l acc =
+  if acc == 13 then []
+  else
+    let lst = check_num l acc in
+    match check_num l acc with
+    | [] -> num_check lst (acc + 1)
+    | nums -> nums
+
+let check_threes_redo l =
+  if List.length l < 3 then None
+  else
+    let sorted_num = sort_by_num l in
+    let nums = num_check sorted_num 0 in
+    if List.length nums < 3 then None else None
 
 let place_three b l = b @ [ l ]
 let place_pair b l = failwith "unimplemented"
