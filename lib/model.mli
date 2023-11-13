@@ -26,6 +26,9 @@ val insert : 'a -> 'a list -> int -> 'a list
 (** Returns [lst] with [ele] inserted at index [i]. Requires: 0 <= [i] <= length
     of [lst]. Raises Invalid_argument with invalid [i].*)
 
+val num_of_tile : tile -> int
+(** Returns a numerical representation of a tile. ELABORATE *)
+
 val replace : 'a -> 'a list -> int -> 'a list
 (** Returns [lst] with [ele] in place of the [i]th element of [lst]. Requires: 0
     <= [i] < length of [lst]. Raises Invalid_argument with invalid [i].*)

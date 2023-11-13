@@ -22,6 +22,16 @@ type game_state = {
   deck : tile list;
 }
 
+let num_of_tile (t : tile) : int =
+  match t with
+  | Joker -> 0
+  | Num { num = n; color = c } -> (
+      match c with
+      | Yellow -> 100 + n
+      | Red -> 200 + n
+      | Blue -> 300 + n
+      | Black -> 400 + n)
+
 let rec insert (ele : 'a) (lst : 'a list) (i : int) : 'a list =
   if i > List.length lst || i < 0 then raise (Invalid_argument "invalid loc")
   else

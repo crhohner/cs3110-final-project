@@ -2,6 +2,7 @@ open OUnit2
 open Rummikaml
 open Model
 open View
+open Cpu
 
 let joker = Joker
 let t1 = Num { color = Yellow; num = 2 }
@@ -417,15 +418,7 @@ let make_multi_player = Game.make [ "Alice"; "Grace"; "David"; "Joy" ]
 
 (* -------------------- Helpers to test make -------------------- *)
 (* Helper that maps given tile to an integer *)
-let num_of_tile (t : tile) : int =
-  match t with
-  | Joker -> 0
-  | Num { num = n; color = c } -> (
-      match c with
-      | Yellow -> 100 + n
-      | Red -> 200 + n
-      | Blue -> 300 + n
-      | Black -> 400 + n)
+
 
 (* Helper that compares two lists and determines whether they contain the same
    elements - order doesn't matter *)
@@ -639,13 +632,53 @@ let printer_tests =
     ( "test string_of_tile on numbered tile 13K" >:: fun _ ->
       assert_equal "[13K]" (Printer.string_of_tile t2) );
     ( "test string_of_row on short row" >:: fun _ ->
-      assert_equal "[5R] [6R] [7R]" (Printer.string_of_row row1) );
+      assert_equal "0:[5R] 1:[6R] 2:[7R]" (Printer.string_of_row row1) );
     ( "test string_of_row on short row with joker" >:: fun _ ->
-      assert_equal "[5K] [JJ] [7Y]" (Printer.string_of_row row2) );
+      assert_equal "0:[5K] 1:[JJ] 2:[7Y]" (Printer.string_of_row row2) );
   ]
+
+let h1 = [Joker; Joker; Joker]
+let n1 = Num {color = Black; num = 2}
+let n2 = Num {color = Black; num = 3}
+let n3 = Num {color = Red; num = 2} 
+
+let h2 = [Num {color = Black; num = 2};Num {color = Black; num = 3};
+Num {color = Black; num = 4};Num {color = Red; num = 4};
+Num {color = Yellow; num = 4};Num {color = Blue; num = 2};
+Num {color = Yellow; num = 1};Num {color = Red; num = 5}; Joker]
+
+let h2_pairs = [[Num {num = 1; color = Yellow}; Joker];
+[Num {num = 4; color = Yellow}; Joker]; [Num {num = 4; color = Red}; Joker];
+[Num {num = 5; color = Red}; Joker]; [Num {num = 2; color = Blue}; Joker];
+[Num {num = 4; color = Red}; Num {num = 4; color = Yellow}];
+[Num {num = 2; color = Black}; Joker]; [Num {num = 3; color = Black}; Joker];
+[Num {num = 4; color = Black}; Joker];
+[Num {num = 4; color = Red}; Num {num = 5; color = Red}];
+[Num {num = 4; color = Black}; Num {num = 4; color = Yellow}];
+[Num {num = 4; color = Black}; Num {num = 4; color = Red}];
+[Num {num = 2; color = Black}; Num {num = 2; color = Blue}];
+[Num {num = 2; color = Black}; Num {num = 3; color = Black}];
+[Num {num = 3; color = Black}; Num {num = 4; color = Black}]]
+
+
+let cpu_tests = [
+  ( "test check_pairs with duplicate pairs" >:: fun _ ->
+    assert_equal [[Joker; Joker]] (Cpu.check_pairs h1) );
+  ( "test check_pairs - color, ascending match" >:: fun _ ->
+    assert_equal [ [n1;n2]] (Cpu.check_pairs [n1;n2]) );
+  ( "test check_pairs - color, descending match" >:: fun _ ->
+      assert_equal [[n1;n2]] (Cpu.check_pairs [n2;n1]) );
+  ( "test check_pairs - number match" >:: fun _ ->
+    assert_equal [[n1;n3]] (Cpu.check_pairs [n1;n3]) );
+  ( "test check_pairs - no match" >:: fun _ ->
+    assert_equal [] (Cpu.check_pairs [n2;n3]) );
+  ( "test check_pairs - ??" >:: fun _ ->
+    assert_equal h2_pairs (Cpu.check_pairs h2) );
+
+]
 
 let suite =
   "test suite for rummikaml"
-  >::: List.flatten [ board_tests; game_tests; printer_tests ]
+  >::: List.flatten [ board_tests; game_tests; printer_tests; cpu_tests ]
 
 let () = run_test_tt_main suite
