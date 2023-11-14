@@ -17,19 +17,50 @@ let rec add_multi set lst =
   | [] -> set
   | h :: t -> add_multi (TileSet.add h set) t
 
-(* Helper of sort_by_num - assigns given tile to integer. *)
-let num (t : tile) : int =
-  match t with
-  | Joker -> 0
-  | Num { num = n; color = c } -> (
-      match c with
-      | Yellow -> (n * 100) + 1
-      | Red -> (n * 100) + 2
-      | Blue -> (n * 100) + 3
-      | Black -> (n * 100) + 4)
+let sort_by_num l =
+  let lst =
+    List.fold_left
+      (fun acc t ->
+        match t with
+        | Joker ->
+            if not (List.mem_assoc 0 acc) then (0, [ t ]) :: acc
+            else (0, [ t; t ]) :: List.remove_assoc 0 acc
+        | Num n ->
+            if not (List.mem_assoc n.num acc) then (n.num, [ t ]) :: acc
+            else
+              let s = List.assoc_opt n.num acc in
+              (n.num, t :: Option.get s) :: List.remove_assoc n.num acc)
+      [] l
+  in
+  snd (List.split lst)
 
-let sort_by_num l = List.sort (fun t1 t2 -> num t1 - num t2) l
-let sort_by_color l = List.sort (fun t1 t2 -> num_of_tile t1 - num_of_tile t2) l
+let sort_by_color l =
+  let lst =
+    List.fold_left
+      (fun acc t ->
+        match t with
+        | Joker ->
+            if not (List.mem_assoc None acc) then (None, [ t ]) :: acc
+            else (None, [ t; t ]) :: List.remove_assoc None acc
+        | Num n ->
+            if not (List.mem_assoc (Some n.color) acc) then
+              (Some n.color, [ t ]) :: acc
+            else
+              let s = List.assoc_opt (Some n.color) acc in
+              (Some n.color, t :: Option.get s)
+              :: List.remove_assoc (Some n.color) acc)
+      [] l
+  in
+  let lst2 = snd (List.split lst) in
+  List.map
+    (fun t_lst ->
+      List.sort
+        (fun t1 t2 ->
+          match (t1, t2) with
+          | Num n1, Num n2 -> n1.num - n2.num
+          | _ -> 0)
+        t_lst)
+    lst2
 
 let pair_in_seq t1 t2 =
   match (t1, t2) with
@@ -137,16 +168,11 @@ let rec colors_check (l : tile list) : tile list option =
       | None -> None
       | Some l -> Some l)
 
-let check_threes l =
-  if List.length l < 3 then None
-  else
-    let sorted_num_l = sort_by_num l in
-    let colors = nums_list sorted_num_l in
-    match colors with
-    | None ->
-        let sorted_color_l = sort_by_color l in
-        colors_check sorted_color_l
-    | _ -> colors
+(** if List.length l < 3 then None else let sorted_num_l = sort_by_num l in let
+    colors = nums_list sorted_num_l in match colors with | None -> let
+    sorted_color_l = sort_by_color l in colors_check sorted_color_l | _ ->
+    colors *)
+let check_threes l = failwith "Unimplemented"
 
 let rec check_num l num =
   match l with
@@ -164,12 +190,9 @@ let rec num_check l acc =
     | [] -> num_check lst (acc + 1)
     | nums -> nums
 
-let check_threes_redo l =
-  if List.length l < 3 then None
-  else
-    let sorted_num = sort_by_num l in
-    let nums = num_check sorted_num 0 in
-    if List.length nums < 3 then None else None
+(** let check_threes_redo l = if List.length l < 3 then None else let sorted_num
+    = sort_by_num l in let nums = num_check sorted_num 0 in if List.length nums
+    < 3 then None else None *)
 
 let place_three b l = b @ [ l ]
 
