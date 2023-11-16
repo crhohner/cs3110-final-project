@@ -208,5 +208,50 @@ let rec place_pair b l =
       (Some [List.hd (List.rev h); tile1; tile2;])
       then (h @ l) :: t
     else h::(place_pair t l)
-let place_one b t = failwith "unimplemented"
+
+(** Helper function for color_seq. Returns true iff all the tiles in a list of colors
+    are composed of colors that differ from one another. Jokers are disregarded in
+    determining the returned boolean. *)
+let rec color_vary l c = 
+  let rec color_mem (c : color) = function 
+    | [] -> false
+    | h::t -> if h = c then true else color_mem c t
+  in match l, c with
+  | h::t, [] -> (match h with
+    | Joker -> color_vary t []
+    | Num n -> color_vary t [n.color])
+  | h::t, c -> (match h with
+    | Joker -> color_vary t c
+    | Num n -> if color_mem n.color c then false else color_vary t (n.color :: c))
+  | [], [] -> true (* should never happen *)
+  | [], c -> true
+
+(** Helper function for place_one that addresses the corner case in which a tile 
+    is potentially to be placed in a three-tile sequence of cards. If the sequence
+    of tiles is a sequence of same-number, color-varied tiles in which the tile
+    can be legally placed, this function returns true.
+    Assumes the sequence of tile is legal such that either all tiles are of the
+    same number or they all vary. *)
+let color_seq (l : tile list) (t : tile) =
+  let rec num_check l t =
+    match t with
+    | Joker -> true
+    | Num n -> (match List.hd l with 
+      | Joker -> (num_check (List.tl l) t)
+      | Num n1 -> n.num = n1.num)
+  in color_vary (t::l) [] && num_check l t
+
+let rec place_one b t = 
+  match b with
+  | [] -> []
+  | h::tl -> 
+    let rev_h = List.rev h in
+    if check_threes [t; List.hd h; List.nth h 1;] = 
+      (Some [t; List.hd h; List.nth h 1;])
+      then (t::h) :: tl
+    else if check_threes [List.nth rev_h 1; List.hd rev_h; t] = 
+      (Some [List.nth rev_h 1; List.hd rev_h; t])
+      then (h @ [t])::tl
+    else if List.length h = 3 && color_seq h t then (t::h)::tl
+    else h::(place_one tl t)
 let turn p b = failwith "unimplemented"
