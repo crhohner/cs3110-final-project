@@ -1,11 +1,15 @@
 open Model
 
-val sort_by_num : tile list -> tile list list
-(** Returns cpu's hand as a list of tile lists sorted by number **)
+val sort_by_num : tile list -> int * tile list list
+(** Returns cpu's hand as association list where the keys are tile numbers
+    (Joker is 0) and the values are lists of the associated tiles (with
+    duplicates removed, excluding Jokers). **)
 
-val sort_by_color : tile list -> tile list list
-(** Returns cpu's hand as a list of tile lists sorted by color - lists
-    themselves are sorted in ascending order by number**)
+val sort_by_color : tile list -> color option * tile list list
+(** Returns cpu's hand as association list where the keys are color options
+    (Joker is None) and the values are lists of the associated tiles (with
+    duplicates removed, excluding Jokers, and sorted in ascending order by
+    number). **)
 
 val check_threes : tile list -> tile list option
 (** Checks cpu's hand for possible valid set of 3 tiles. Returns [None] if no
