@@ -267,4 +267,38 @@ let rec place_one b t =
       else if List.length h = 3 && color_seq h t then (t :: h) :: tl
       else h :: place_one tl t
 
-let turn p b = failwith "unimplemented"
+let rec find_valid_pair (b : tile list list) (l : tile list list) =
+  match l with
+  | [] -> b
+  | h :: t ->
+      let new_board = place_pair b h in
+      if new_board = b then find_valid_pair b t else new_board
+
+let rec place_one_rec (b : tile list list) (l : tile list) =
+  match l with
+  | [] -> b
+  | h :: t ->
+      let new_board = place_one b h in
+      if new_board = b then place_one_rec b t else new_board
+
+let rec turn p b =
+  let hand = p.hand in
+  let threes = check_threes hand in
+  match threes with
+  | Some l ->
+      let new_board = place_three b l in
+      (*update hand here and put that as updated player in turn call - get
+        indices of the tiles and remove them from hand*)
+      turn p new_board
+  | None ->
+      let pairs = check_pairs hand in
+      let new_board = find_valid_pair b pairs in
+      if new_board = b then
+        let new_board = place_one_rec b hand in
+        if new_board = b then (p, new_board)
+        else
+          (*update hand here and put that as updated player in turn call - get
+            indices of the tiles and remove them from hand*) (p, new_board)
+      else
+        (*update hand here and put that as updated player in turn call - get
+          indices of the tiles and remove them from hand*) turn p new_board
