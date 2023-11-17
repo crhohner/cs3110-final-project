@@ -267,19 +267,34 @@ let rec place_one b t =
       else if List.length h = 3 && color_seq h t then (t :: h) :: tl
       else h :: place_one tl t
 
+(**recursively goes through place pair list to see if any are valid and returns
+   new board**)
 let rec find_valid_pair (b : tile list list) (l : tile list list) =
   match l with
-  | [] -> b
+  | [] -> (b, [])
   | h :: t ->
       let new_board = place_pair b h in
-      if new_board = b then find_valid_pair b t else new_board
+      if new_board = b then find_valid_pair b t else (new_board, h)
 
+(**recursively checks if tile can be placed on board and returns new board**)
 let rec place_one_rec (b : tile list list) (l : tile list) =
   match l with
-  | [] -> b
+  | [] -> (b, None)
   | h :: t ->
       let new_board = place_one b h in
-      if new_board = b then place_one_rec b t else new_board
+      if new_board = b then place_one_rec b t else (new_board, Some h)
+
+(**returns index of [t] in [lst]**)
+let rec find_tile (lst : tile list) (t : tile) acc =
+  match lst with
+  | [] -> -1
+  | h :: tail -> if h = t then acc else find_tile tail t (acc + 1)
+
+(**removes each tile in l from hand**)
+let rec remove_tiles (hand : tile list) (l : tile list) =
+  match l with
+  | [] -> hand
+  | h :: t -> remove_tiles (snd (remove (find_tile hand h 0) hand)) t
 
 let rec turn p b =
   let hand = p.hand in
@@ -287,18 +302,21 @@ let rec turn p b =
   match threes with
   | Some l ->
       let new_board = place_three b l in
-      (*update hand here and put that as updated player in turn call - get
-        indices of the tiles and remove them from hand*)
-      turn p new_board
+      let new_hand = remove_tiles hand l in
+      turn { p with hand = new_hand } new_board
   | None ->
       let pairs = check_pairs hand in
-      let new_board = find_valid_pair b pairs in
+      let new_board = fst (find_valid_pair b pairs) in
       if new_board = b then
-        let new_board = place_one_rec b hand in
-        if new_board = b then (p, new_board)
+        let new_board = fst (place_one_rec b hand) in
+        if new_board = b then (p, b)
         else
-          (*update hand here and put that as updated player in turn call - get
-            indices of the tiles and remove them from hand*) (p, new_board)
+          let t = snd (place_one_rec b hand) in
+          match t with
+          | None -> (p, new_board)
+          | Some tile ->
+              let new_hand = remove_tiles hand [ tile ] in
+              ({ p with hand = new_hand }, new_board)
       else
-        (*update hand here and put that as updated player in turn call - get
-          indices of the tiles and remove them from hand*) turn p new_board
+        let new_hand = remove_tiles hand (snd (find_valid_pair b pairs)) in
+        turn { p with hand = new_hand } new_board
