@@ -647,6 +647,9 @@ Num {color = Black; num = 4};Num {color = Red; num = 4};
 Num {color = Yellow; num = 4};Num {color = Blue; num = 2};
 Num {color = Yellow; num = 1};Num {color = Red; num = 5}; Joker]
 
+let h3 = [Num {color = Yellow; num = 2}; Num {color = Black; num = 2};
+ Num {color = Blue; num = 2}; Num {color = Red; num = 2}]
+
 let h2_pairs = [[Num {num = 1; color = Yellow}; Joker];
 [Num {num = 4; color = Yellow}; Joker]; [Num {num = 4; color = Red}; Joker];
 [Num {num = 5; color = Red}; Joker]; [Num {num = 2; color = Blue}; Joker];
@@ -659,6 +662,13 @@ let h2_pairs = [[Num {num = 1; color = Yellow}; Joker];
 [Num {num = 2; color = Black}; Num {num = 2; color = Blue}];
 [Num {num = 2; color = Black}; Num {num = 3; color = Black}];
 [Num {num = 3; color = Black}; Num {num = 4; color = Black}]]
+
+let h3_pairs = [[Num {num = 2; color = Yellow}; Num {num = 2; color = Red}];
+[Num {num = 2; color = Yellow}; Num {num = 2; color = Blue}];
+[Num {num = 2; color = Yellow}; Num {num = 2; color = Black}];
+[Num {num = 2; color = Blue}; Num {num = 2; color = Red}];
+[Num {num = 2; color = Black}; Num {num = 2; color = Red}];
+[Num {num = 2; color = Black}; Num {num = 2; color = Blue}]]
 
 
 let cpu_tests = [
@@ -674,6 +684,7 @@ let cpu_tests = [
     assert_equal [] (Cpu.check_pairs [n2;n3]) );
   ( "test check_pairs - ??" >:: fun _ ->
     assert_equal h2_pairs (Cpu.check_pairs h2) );
+  ("test check_pairs - same sum pair" >:: fun _ -> assert_equal (Cpu.check_pairs h3) h3_pairs )
 
 ]
 

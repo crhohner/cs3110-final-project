@@ -7,15 +7,19 @@ module Ord : Set.OrderedType with type t = tile list = struct
     | [] -> 0
     | h :: t -> num_of_tile h + sum t
 
-  let compare l1 l2 = sum l1 - sum l2
+  let compare l1 l2 =
+    if l1 <> l2 then if sum l1 - sum l2 = 0 then 1 else sum l1 - sum l2 else 0
 end
 
-module TileSet : Set.S with type elt = tile list = Set.Make (Ord)
+(*TileListSets guarantee that no two lists in a set have the same tiles,
+  regardless of order.*)
+module TileListSet : Set.S with type elt = tile list = Set.Make (Ord)
 
+(*Returns [set] with each element in [lst] inserted.*)
 let rec add_multi set lst =
   match lst with
   | [] -> set
-  | h :: t -> add_multi (TileSet.add h set) t
+  | h :: t -> add_multi (TileListSet.add h set) t
 
 (* Helper of sort_by_num *)
 let rec find_c (c : color) (lst : tile list) =
@@ -84,6 +88,10 @@ let sort_by_color l =
       (x, lst))
     lst
 
+(*Returns whether [t1] and [t2] form a valid ordered, sequence. Following
+  Rummikaml rules, this is true if a) [t1] and [t2] are the same color and the
+  number of [t2] is one more than the number of [t1], or b) [t1] and [t2] have
+  the same number but different colors.*)
 let pair_in_seq t1 t2 =
   match (t1, t2) with
   | Joker, Num n -> true
@@ -92,6 +100,8 @@ let pair_in_seq t1 t2 =
   | Num { color = c1; num = n1 }, Num { color = c2; num = n2 } ->
       (c1 <> c2 && n1 = n2) || (c1 = c2 && n1 + 1 = n2)
 
+(*Returns all in-sequence pairs that can be created from [tile] and another tile
+  in [lst]. Does not guarantee unique pairs.*)
 let check_pairs_aux (tile : tile) (lst : tile list) : tile list list =
   let rec aux (acc : tile list list) (l : tile list) : tile list list =
     match l with
@@ -108,9 +118,14 @@ let check_pairs (tiles : tile list) : tile list list =
     | h :: t -> aux (add_multi acc (check_pairs_aux h t)) t
     | [] -> acc
   in
-  TileSet.elements (aux TileSet.empty tiles)
+  TileListSet.elements (aux TileListSet.empty tiles)
 
-(*checks for ascending sequences within a tile list*)
+(*the two functions below are used to find all sequences from the two sort
+  outcomes that do not require a joker. *)
+
+(*Returns a sequence of three ascending tiles given a list of tiles, or [None]
+  if no such sequence exists. Requires: tiles in [l] are all the same color and
+  sorted in ascending order, and there are no duplicates in [l].*)
 let rec find_num_seq (l : tile list) : tile list option =
   match l with
   | Num n1 :: Num n2 :: Num n3 :: t ->
@@ -119,23 +134,18 @@ let rec find_num_seq (l : tile list) : tile list option =
       else find_num_seq (Num n2 :: Num n3 :: t)
   | _ -> None
 
-(*returns set of three tiles within a tile list *)
+(*Returns an option containing sequence of three tiles from a list of tiles [l],
+  or [None] if [l] is too short. In context, [find_color_seq] requires that [l]
+  contains no duplicate elements and that every tiles in [l] has the same
+  number.*)
 let rec find_color_seq (l : tile list) : tile list option =
   match l with
   | Num n1 :: Num n2 :: Num n3 :: t -> Some [ Num n1; Num n2; Num n3 ]
   | _ -> None
 
-(*checks for ascending sequences within the output of sort_by_num assuming no
-  jokers present*)
-let rec check_seqs_by_num (l : (int * tile list) list) : tile list option =
-  match l with
-  | (k, v) :: t -> (
-      match find_num_seq v with
-      | Some lst -> Some lst
-      | None -> check_seqs_by_num t)
-  | [] -> None
-
-(*checks for some sequence using a given find method*)
+(*Returns an option containing an ordered sequence of three tiles matching a
+  certain rule defined by [find] from the outcome of a sort, or [None] if no
+  such sequence can be found.*)
 let rec check_seqs find (l : ('a * tile list) list) : tile list option =
   match l with
   | (k, v) :: t -> (
@@ -144,8 +154,9 @@ let rec check_seqs find (l : ('a * tile list) list) : tile list option =
       | None -> check_seqs find t)
   | _ -> None
 
-(*find stuff that works with jokers*)
-(*single joker*)
+(*Returns an option containing a three-tile ascending sequence that can be made
+  from two tiles in [l] and a single joker or [None] if no such sequence can be
+  found.*)
 let rec find_num_pair_j (l : tile list) : tile list option =
   match l with
   | Num n1 :: Num n2 :: t ->
@@ -154,12 +165,15 @@ let rec find_num_pair_j (l : tile list) : tile list option =
       else find_num_seq (Num n2 :: t)
   | _ -> None
 
+(*Returns an option containing a three-tile same number, different color
+  sequence that can be made from two tiles in [l] and a single joker or [None]
+  if no such sequence can be found.*)
 let rec find_color_pair_j (l : tile list) : tile list option =
   match l with
   | Num n1 :: Num n2 :: t -> Some [ Num n1; Num n2; Joker ]
   | _ -> None
 
-(*finds first non-Joker tile*)
+(*Returns the first tile in [l] that is not a joker.*)
 let rec find_first_num (l : tile list) =
   match l with
   | [] -> None
@@ -213,9 +227,9 @@ let rec place_pair b l =
       then (h @ l) :: t
       else h :: place_pair t l
 
-(** Helper function for color_seq. Returns true iff all the tiles in a list of
-    colors are composed of colors that differ from one another. Jokers are
-    disregarded in determining the returned boolean. *)
+(** Returns iff all the tiles in a list of colors are composed of colors that
+    differ from one another. Jokers are disregarded in determining the returned
+    boolean. Helper function for color_seq.*)
 let rec color_vary l c =
   let rec color_mem (c : color) = function
     | [] -> false
@@ -267,8 +281,9 @@ let rec place_one b t =
       else if List.length h = 3 && color_seq h t then (t :: h) :: tl
       else h :: place_one tl t
 
-(**recursively goes through place pair list to see if any are valid and returns
-   new board**)
+(**Returns a board with a pair of tiles from [l] added to it alongide that pair.
+   If no pair can be added, returns an unaltered board and ([]). Requires: [b]
+   is a legal board, [l] contains only in-sequence pairs. **)
 let rec find_valid_pair (b : tile list list) (l : tile list list) =
   match l with
   | [] -> (b, [])
@@ -276,7 +291,9 @@ let rec find_valid_pair (b : tile list list) (l : tile list list) =
       let new_board = place_pair b h in
       if new_board = b then find_valid_pair b t else (new_board, h)
 
-(**recursively checks if tile can be placed on board and returns new board**)
+(**Returns a board with a tile from [l] added to it alongide an option
+   containing that tile. If no tile from [l] can be added, returns an unaltered
+   board and [None]. Requires: [b] is a legal board. **)
 let rec place_one_rec (b : tile list list) (l : tile list) =
   match l with
   | [] -> (b, None)
@@ -284,14 +301,14 @@ let rec place_one_rec (b : tile list list) (l : tile list) =
       let new_board = place_one b h in
       if new_board = b then place_one_rec b t else (new_board, Some h)
 
-(**returns index of [t] in [lst]**)
-let rec find_tile (lst : tile list) (t : tile) acc =
+(**Returns the first index of [t] in [lst], or -1 if [t] is not in [lst].**)
+let rec find_tile (lst : 'a list) (t : 'a) acc =
   match lst with
   | [] -> -1
   | h :: tail -> if h = t then acc else find_tile tail t (acc + 1)
 
-(**removes each tile in l from hand**)
-let rec remove_tiles (hand : tile list) (l : tile list) =
+(**Removes the first instance of each item in [l] from [hand].**)
+let rec remove_tiles (hand : 'a list) (l : 'a list) =
   match l with
   | [] -> hand
   | h :: t -> remove_tiles (snd (remove (find_tile hand h 0) hand)) t
