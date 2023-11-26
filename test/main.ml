@@ -419,7 +419,6 @@ let make_multi_player = Game.make [ "Alice"; "Grace"; "David"; "Joy" ]
 (* -------------------- Helpers to test make -------------------- *)
 (* Helper that maps given tile to an integer *)
 
-
 (* Helper that compares two lists and determines whether they contain the same
    elements - order doesn't matter *)
 let cmp (lst1 : tile list) (lst2 : tile list) : bool =
@@ -540,7 +539,6 @@ let game_tests =
      let full = h @ make_multi_player.deck in
      "test entire deck, multiple players" >:: fun _ ->
      assert_equal true (cmp full entire_deck));
-    (* unit tests of next_player using make *)
     (*check_win tests*)
     (** (let game = { players = []; board = []; deck = [] } in
      "returns None on empty player list" >:: fun _ ->
@@ -637,56 +635,269 @@ let printer_tests =
       assert_equal "0:[5K] 1:[JJ] 2:[7Y]" (Printer.string_of_row row2) );
   ]
 
-let h1 = [Joker; Joker; Joker]
-let n1 = Num {color = Black; num = 2}
-let n2 = Num {color = Black; num = 3}
-let n3 = Num {color = Red; num = 2} 
+let h1 = [ Joker; Joker; Joker ]
+let n1 = Num { color = Black; num = 2 }
+let n2 = Num { color = Black; num = 3 }
+let n3 = Num { color = Red; num = 2 }
 
-let h2 = [Num {color = Black; num = 2};Num {color = Black; num = 3};
-Num {color = Black; num = 4};Num {color = Red; num = 4};
-Num {color = Yellow; num = 4};Num {color = Blue; num = 2};
-Num {color = Yellow; num = 1};Num {color = Red; num = 5}; Joker]
+let h2 =
+  [
+    Num { color = Black; num = 2 };
+    Num { color = Black; num = 3 };
+    Num { color = Black; num = 4 };
+    Num { color = Red; num = 4 };
+    Num { color = Yellow; num = 4 };
+    Num { color = Blue; num = 2 };
+    Num { color = Yellow; num = 1 };
+    Num { color = Red; num = 5 };
+    Joker;
+  ]
 
-let h3 = [Num {color = Yellow; num = 2}; Num {color = Black; num = 2};
- Num {color = Blue; num = 2}; Num {color = Red; num = 2}]
+let h3 =
+  [
+    Num { color = Yellow; num = 2 };
+    Num { color = Black; num = 2 };
+    Num { color = Blue; num = 2 };
+    Num { color = Red; num = 2 };
+  ]
 
-let h2_pairs = [[Num {num = 1; color = Yellow}; Joker];
-[Num {num = 4; color = Yellow}; Joker]; [Num {num = 4; color = Red}; Joker];
-[Num {num = 5; color = Red}; Joker]; [Num {num = 2; color = Blue}; Joker];
-[Num {num = 4; color = Red}; Num {num = 4; color = Yellow}];
-[Num {num = 2; color = Black}; Joker]; [Num {num = 3; color = Black}; Joker];
-[Num {num = 4; color = Black}; Joker];
-[Num {num = 4; color = Red}; Num {num = 5; color = Red}];
-[Num {num = 4; color = Black}; Num {num = 4; color = Yellow}];
-[Num {num = 4; color = Black}; Num {num = 4; color = Red}];
-[Num {num = 2; color = Black}; Num {num = 2; color = Blue}];
-[Num {num = 2; color = Black}; Num {num = 3; color = Black}];
-[Num {num = 3; color = Black}; Num {num = 4; color = Black}]]
+let h2_pairs =
+  [
+    [ Num { num = 1; color = Yellow }; Joker ];
+    [ Num { num = 4; color = Yellow }; Joker ];
+    [ Num { num = 4; color = Red }; Joker ];
+    [ Num { num = 5; color = Red }; Joker ];
+    [ Num { num = 2; color = Blue }; Joker ];
+    [ Num { num = 4; color = Red }; Num { num = 4; color = Yellow } ];
+    [ Num { num = 2; color = Black }; Joker ];
+    [ Num { num = 3; color = Black }; Joker ];
+    [ Num { num = 4; color = Black }; Joker ];
+    [ Num { num = 4; color = Red }; Num { num = 5; color = Red } ];
+    [ Num { num = 4; color = Black }; Num { num = 4; color = Yellow } ];
+    [ Num { num = 4; color = Black }; Num { num = 4; color = Red } ];
+    [ Num { num = 2; color = Black }; Num { num = 2; color = Blue } ];
+    [ Num { num = 2; color = Black }; Num { num = 3; color = Black } ];
+    [ Num { num = 3; color = Black }; Num { num = 4; color = Black } ];
+  ]
 
-let h3_pairs = [[Num {num = 2; color = Yellow}; Num {num = 2; color = Red}];
-[Num {num = 2; color = Yellow}; Num {num = 2; color = Blue}];
-[Num {num = 2; color = Yellow}; Num {num = 2; color = Black}];
-[Num {num = 2; color = Blue}; Num {num = 2; color = Red}];
-[Num {num = 2; color = Black}; Num {num = 2; color = Red}];
-[Num {num = 2; color = Black}; Num {num = 2; color = Blue}]]
+let h3_pairs =
+  [
+    [ Num { num = 2; color = Yellow }; Num { num = 2; color = Red } ];
+    [ Num { num = 2; color = Yellow }; Num { num = 2; color = Blue } ];
+    [ Num { num = 2; color = Yellow }; Num { num = 2; color = Black } ];
+    [ Num { num = 2; color = Blue }; Num { num = 2; color = Red } ];
+    [ Num { num = 2; color = Black }; Num { num = 2; color = Red } ];
+    [ Num { num = 2; color = Black }; Num { num = 2; color = Blue } ];
+  ]
 
-
-let cpu_tests = [
-  ( "test check_pairs with duplicate pairs" >:: fun _ ->
-    assert_equal [[Joker; Joker]] (Cpu.check_pairs h1) );
-  ( "test check_pairs - color, ascending match" >:: fun _ ->
-    assert_equal [ [n1;n2]] (Cpu.check_pairs [n1;n2]) );
-  ( "test check_pairs - color, descending match" >:: fun _ ->
-      assert_equal [[n1;n2]] (Cpu.check_pairs [n2;n1]) );
-  ( "test check_pairs - number match" >:: fun _ ->
-    assert_equal [[n1;n3]] (Cpu.check_pairs [n1;n3]) );
-  ( "test check_pairs - no match" >:: fun _ ->
-    assert_equal [] (Cpu.check_pairs [n2;n3]) );
-  ( "test check_pairs - ??" >:: fun _ ->
-    assert_equal h2_pairs (Cpu.check_pairs h2) );
-  ("test check_pairs - same sum pair" >:: fun _ -> assert_equal (Cpu.check_pairs h3) h3_pairs )
-
-]
+let cpu_tests =
+  [
+    (* sort_by_num tests *)
+    ( "test sort_by_num, empty tile list" >:: fun _ ->
+      assert_equal [] (Cpu.sort_by_num []) );
+    ( "test sort_by_num, single tile list" >:: fun _ ->
+      assert_equal
+        [ (2, [ Num { num = 2; color = Black } ]) ]
+        (Cpu.sort_by_num [ n1 ]) );
+    ( "test sort_by_num, list of same tile pair" >:: fun _ ->
+      assert_equal
+        [ (2, [ Num { num = 2; color = Black } ]) ]
+        (Cpu.sort_by_num [ n1; n1 ]) );
+    ( "test sort_by_num, list of Joker pair" >:: fun _ ->
+      assert_equal [ (0, [ Joker; Joker ]) ] (Cpu.sort_by_num [ Joker; Joker ])
+    );
+    (let mult_lst =
+       [
+         Num { num = 2; color = Black };
+         Num { num = 2; color = Red };
+         Num { num = 10; color = Yellow };
+         Num { num = 11; color = Black };
+       ]
+     in
+     "test sort_by_num, multi-tile list - no duplicates, no Jokers 1"
+     >:: fun _ ->
+     assert_equal
+       [
+         (11, [ Num { num = 11; color = Black } ]);
+         (10, [ Num { num = 10; color = Yellow } ]);
+         (2, [ Num { num = 2; color = Red }; Num { num = 2; color = Black } ]);
+       ]
+       (Cpu.sort_by_num mult_lst));
+    (let mult_lst =
+       [
+         Num { num = 1; color = Black };
+         Num { num = 3; color = Blue };
+         Num { num = 3; color = Yellow };
+         Num { num = 1; color = Blue };
+         Num { num = 2; color = Blue };
+         Num { num = 3; color = Red };
+       ]
+     in
+     "test sort_by_num, multi-tile list - no duplicates, no Jokers 2"
+     >:: fun _ ->
+     assert_equal
+       [
+         ( 3,
+           [
+             Num { num = 3; color = Red };
+             Num { num = 3; color = Yellow };
+             Num { num = 3; color = Blue };
+           ] );
+         (2, [ Num { num = 2; color = Blue } ]);
+         (1, [ Num { num = 1; color = Blue }; Num { num = 1; color = Black } ]);
+       ]
+       (Cpu.sort_by_num mult_lst));
+    (let mult_lst =
+       [
+         Num { num = 1; color = Black };
+         Num { num = 2; color = Black };
+         Num { num = 1; color = Red };
+         Num { num = 1; color = Black };
+         Num { num = 2; color = Red };
+       ]
+     in
+     "test sort_by_num, multi-tile list - duplicates, no Jokers" >:: fun _ ->
+     assert_equal
+       [
+         (2, [ Num { num = 2; color = Red }; Num { num = 2; color = Black } ]);
+         (1, [ Num { num = 1; color = Red }; Num { num = 1; color = Black } ]);
+       ]
+       (Cpu.sort_by_num mult_lst));
+    (let mult_lst =
+       [
+         Joker;
+         Num { num = 9; color = Blue };
+         Num { num = 8; color = Red };
+         Joker;
+         Num { num = 9; color = Blue };
+         Num { num = 8; color = Blue };
+         Num { num = 9; color = Yellow };
+         Num { num = 11; color = Black };
+       ]
+     in
+     "test sort_by_num, multi-tile list - duplicates, Jokers" >:: fun _ ->
+     assert_equal
+       [
+         (11, [ Num { num = 11; color = Black } ]);
+         (9, [ Num { num = 9; color = Yellow }; Num { num = 9; color = Blue } ]);
+         (8, [ Num { num = 8; color = Blue }; Num { num = 8; color = Red } ]);
+         (0, [ Joker; Joker ]);
+       ]
+       (Cpu.sort_by_num mult_lst));
+    (* sort_by_color tests *)
+    ( "test sort_by_color, empty list" >:: fun _ ->
+      assert_equal [] (Cpu.sort_by_color []) );
+    ( "test sort_by_color, single tile list" >:: fun _ ->
+      assert_equal
+        [ (Some Black, [ Num { num = 2; color = Black } ]) ]
+        (Cpu.sort_by_color [ n1 ]) );
+    ( "test sort_by_color, list of same tile pair" >:: fun _ ->
+      assert_equal
+        [ (Some Black, [ Num { num = 2; color = Black } ]) ]
+        (Cpu.sort_by_color [ n1; n1 ]) );
+    ( "test sort_by_color, list of Joker pair" >:: fun _ ->
+      assert_equal
+        [ (None, [ Joker; Joker ]) ]
+        (Cpu.sort_by_color [ Joker; Joker ]) );
+    (let mult_lst =
+       [
+         Num { num = 1; color = Black };
+         Num { num = 13; color = Black };
+         Num { num = 7; color = Yellow };
+         Num { num = 3; color = Black };
+         Num { num = 4; color = Yellow };
+         Num { num = 11; color = Blue };
+       ]
+     in
+     "test sort_by_color, multi-tile list - no duplicates, no Jokers"
+     >:: fun _ ->
+     assert_equal
+       [
+         (Some Blue, [ Num { num = 11; color = Blue } ]);
+         ( Some Yellow,
+           [ Num { num = 4; color = Yellow }; Num { num = 7; color = Yellow } ]
+         );
+         ( Some Black,
+           [
+             Num { num = 1; color = Black };
+             Num { num = 3; color = Black };
+             Num { num = 13; color = Black };
+           ] );
+       ]
+       (Cpu.sort_by_color mult_lst));
+    (let mult_lst =
+       [
+         Num { num = 2; color = Blue };
+         Num { num = 8; color = Black };
+         Num { num = 2; color = Blue };
+         Num { num = 6; color = Blue };
+         Num { num = 3; color = Red };
+         Num { num = 8; color = Black };
+         Num { num = 5; color = Black };
+         Num { num = 1; color = Blue };
+       ]
+     in
+     "test sort_by_color, multi-tile list - duplicates, no Jokers" >:: fun _ ->
+     assert_equal
+       [
+         ( Some Blue,
+           [
+             Num { num = 1; color = Blue };
+             Num { num = 2; color = Blue };
+             Num { num = 6; color = Blue };
+           ] );
+         ( Some Black,
+           [ Num { num = 5; color = Black }; Num { num = 8; color = Black } ] );
+         (Some Red, [ Num { num = 3; color = Red } ]);
+       ]
+       (Cpu.sort_by_color mult_lst));
+    (let mult_lst =
+       [
+         Num { num = 4; color = Yellow };
+         Num { num = 8; color = Yellow };
+         Joker;
+         Num { num = 10; color = Red };
+         Num { num = 1; color = Red };
+         Joker;
+         Num { num = 1; color = Red };
+         Num { num = 13; color = Blue };
+         Num { num = 11; color = Blue };
+         Num { num = 1; color = Yellow };
+         Num { num = 4; color = Yellow };
+       ]
+     in
+     "test sort_by_color, multi-tile list - duplicates, Jokers" >:: fun _ ->
+     assert_equal
+       [
+         ( Some Yellow,
+           [
+             Num { num = 1; color = Yellow };
+             Num { num = 4; color = Yellow };
+             Num { num = 8; color = Yellow };
+           ] );
+         ( Some Blue,
+           [ Num { num = 11; color = Blue }; Num { num = 13; color = Blue } ] );
+         (None, [ Joker; Joker ]);
+         ( Some Red,
+           [ Num { num = 1; color = Red }; Num { num = 10; color = Red } ] );
+       ]
+       (Cpu.sort_by_color mult_lst));
+    (* check_pairs tests *)
+    ( "test check_pairs with duplicate pairs" >:: fun _ ->
+      assert_equal [ [ Joker; Joker ] ] (Cpu.check_pairs h1) );
+    ( "test check_pairs - color, ascending match" >:: fun _ ->
+      assert_equal [ [ n1; n2 ] ] (Cpu.check_pairs [ n1; n2 ]) );
+    ( "test check_pairs - color, descending match" >:: fun _ ->
+      assert_equal [ [ n1; n2 ] ] (Cpu.check_pairs [ n2; n1 ]) );
+    ( "test check_pairs - number match" >:: fun _ ->
+      assert_equal [ [ n1; n3 ] ] (Cpu.check_pairs [ n1; n3 ]) );
+    ( "test check_pairs - no match" >:: fun _ ->
+      assert_equal [] (Cpu.check_pairs [ n2; n3 ]) );
+    ( "test check_pairs - ??" >:: fun _ ->
+      assert_equal h2_pairs (Cpu.check_pairs h2) );
+    ( "test check_pairs - same sum pair" >:: fun _ ->
+      assert_equal (Cpu.check_pairs h3) h3_pairs );
+  ]
 
 let suite =
   "test suite for rummikaml"

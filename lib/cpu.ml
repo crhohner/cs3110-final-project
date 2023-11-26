@@ -21,7 +21,8 @@ let rec add_multi set lst =
   | [] -> set
   | h :: t -> add_multi (TileListSet.add h set) t
 
-(* Helper of sort_by_num *)
+(* Helper of sort_by_num. Determines whether tile list contains tile with given
+   color. If yes, returns true, else returns false. *)
 let rec find_c (c : color) (lst : tile list) =
   match lst with
   | [] -> false
@@ -46,7 +47,8 @@ let sort_by_num l =
             else (n.num, t :: Option.get s) :: List.remove_assoc n.num acc)
     [] l
 
-(* Helper of sort_by_color *)
+(* Helper of sort_by_color. Determines whether tile list contains tile with
+   given number. If yes, returns true, else returns false. *)
 let rec find_n (n : int) (lst : tile list) =
   match lst with
   | [] -> false
