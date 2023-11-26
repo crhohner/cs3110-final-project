@@ -897,6 +897,31 @@ let cpu_tests =
       assert_equal h2_pairs (Cpu.check_pairs h2) );
     ( "test check_pairs - same sum pair" >:: fun _ ->
       assert_equal (Cpu.check_pairs h3) h3_pairs );
+
+    (*check threes tests*)
+    ("test check_threes - less than three tiles" >:: fun _ -> assert_equal 
+    None (Cpu.check_threes [Num {num = 1; color = Yellow}]));
+    ("test check_threes - only three unordered same color" >:: fun _ -> assert_equal 
+    (Some [Num {num = 1; color = Yellow}; Num {num = 2; color = Yellow}; Num {num = 3; color = Yellow}])
+    (Cpu.check_threes [Num {num = 1; color = Yellow}; Num {num = 3; color = Yellow}; Num {num = 2; color = Yellow}]));
+    ("test check_threes - unordered two valid options (same color)" >:: fun _ -> assert_equal 
+    (Some [Num {num = 4; color = Blue}; Num {num = 5; color = Blue}; Num {num = 6; color = Blue}])
+    (Cpu.check_threes [Num {num = 5; color = Red}; Num {num = 4; color = Blue}; Num {num = 5; color = Black}; Num {num = 5; color = Blue}; Num {num = 6; color = Blue}]));
+    
+      (*insert some tests for same num here*)
+    ("test check_threes - one Joker, same color" >:: fun _ -> assert_equal 
+    (Some [Num {num = 7; color = Blue}; Num {num = 8; color = Blue}; Joker]) 
+    (Cpu.check_threes [Num {num = 7; color = Blue}; Joker; Num {num = 8; color = Red}; Num {num = 8; color = Blue}]));
+    ("test check_threes - Joker in between same color" >:: fun _ -> assert_equal 
+    (*this test fails ^^ because it thinks the Joker should be at the end*)
+    (Some [Num {num = 10; color = Red}; Joker; Num {num = 12; color = Red}])
+    (Cpu.check_threes [Num {num = 9; color = Black}; Joker; Num {num = 12; color = Red}; Num {num = 10; color = Red}; Num {num = 10; color = Yellow}]));
+    ("test check_threes - two Jokers plus tile" >:: fun _ -> assert_equal 
+    (Some [Num {num = 4; color = Red}; Joker; Joker])
+    (Cpu.check_threes [Joker; Joker; Num {num = 4; color = Red}; Num {num = 2; color = Blue}]));
+    ("test check_threes - only two Jokers" >:: fun _ -> assert_equal 
+    (None) (Cpu.check_threes [Joker; Joker]));
+
   ]
 
 let suite =
