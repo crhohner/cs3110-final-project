@@ -14,6 +14,7 @@ type tile =
 type player = {
   hand : tile list;
   name : string;
+  isCpu : bool;
 }
 
 type game_state = {
@@ -293,7 +294,7 @@ end
 module type GameType = sig
   val next_player : game_state -> game_state
   val check_win : player -> bool
-  val make : string list -> game_state
+  val make : string list -> string list -> game_state
   val active_player : game_state -> player
 end
 
@@ -370,9 +371,12 @@ module Game : GameType = struct
 
   (** Function that takes in names of players and creates initial game_state.
       Note board is empty. *)
-  let make (names : string list) : game_state =
-    let p = List.map (fun n -> { hand = []; name = n }) names in
-    let dis = distribute_hand p (create_deck 13 []) in
+  let make (players : string list) (cpus : string list) : game_state =
+    let p =
+      List.map (fun n -> { hand = []; name = n; isCpu = false }) players
+    in
+    let c = List.map (fun n -> { hand = []; name = n; isCpu = true }) cpus in
+    let dis = distribute_hand (p @ c) (create_deck 13 []) in
     choose_first_player { players = fst dis; board = []; deck = snd dis }
 
   let active_player (state : game_state) = List.hd state.players

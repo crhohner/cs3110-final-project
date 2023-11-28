@@ -14,6 +14,7 @@ type tile =
 type player = {
   hand : tile list;
   name : string;
+  isCpu : bool;
 }
 
 type game_state = {
@@ -82,7 +83,7 @@ module type GameType = sig
   val check_win : player -> bool
   (**Returns whether given player has won the game, returns a bool *)
 
-  val make : string list -> game_state
+  val make : string list -> string list -> game_state
   (**Returns an initial game state before the first move, created from a list of
      player names*)
 

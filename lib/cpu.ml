@@ -316,27 +316,63 @@ let rec remove_tiles (hand : 'a list) (l : 'a list) =
   | [] -> hand
   | h :: t -> remove_tiles (snd (remove (find_tile hand h 0) hand)) t
 
-let rec turn p b =
+let rec turn game_state : game_state =
+  let p = Game.active_player game_state in
+  let b = game_state.board in
+  let d = game_state.deck in
   let hand = p.hand in
   let threes = check_threes hand in
   match threes with
   | Some l ->
       let new_board = place_three b l in
       let new_hand = remove_tiles hand l in
-      turn { p with hand = new_hand } new_board
+      let p' = { p with hand = new_hand } in
+      let new_game_state =
+        {
+          players = p' :: List.tl game_state.players;
+          board = new_board;
+          deck = d;
+        }
+      in
+      turn new_game_state
   | None ->
       let pairs = check_pairs hand in
       let new_board = fst (find_valid_pair b pairs) in
       if new_board = b then
-        let new_board = fst (place_one_rec b hand) in
-        if new_board = b then (p, b)
-        else
-          let t = snd (place_one_rec b hand) in
-          match t with
-          | None -> (p, new_board)
-          | Some tile ->
-              let new_hand = remove_tiles hand [ tile ] in
-              ({ p with hand = new_hand }, new_board)
+        let new_board, t = place_one_rec b hand in
+        match t with
+        | None ->
+            let rand_tile = d |> List.length |> Random.int in
+            let drawn, new_deck = remove rand_tile d in
+            let new_game_state =
+              {
+                players =
+                  List.tl game_state.players
+                  @ [ { p with hand = drawn :: p.hand } ];
+                board = new_board;
+                deck = new_deck;
+              }
+            in
+            new_game_state
+        | Some tile ->
+            let new_hand = remove_tiles hand [ tile ] in
+            let p' = { p with hand = new_hand } in
+            let new_game_state =
+              {
+                players = List.tl game_state.players @ [ p' ];
+                board = new_board;
+                deck = d;
+              }
+            in
+            new_game_state
       else
         let new_hand = remove_tiles hand (snd (find_valid_pair b pairs)) in
-        turn { p with hand = new_hand } new_board
+        let p' = { p with hand = new_hand } in
+        let new_game_state =
+          {
+            players = p' :: List.tl game_state.players;
+            board = new_board;
+            deck = d;
+          }
+        in
+        turn new_game_state

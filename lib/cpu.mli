@@ -33,7 +33,7 @@ val place_one : tile list list -> tile -> tile list list
 (** Returns a board with a tile from [l] placed down at a legal location. If no
     tile can be placed, returns AN UNALTERED BOARD.*)
 
-val turn : player -> tile list list -> player * tile list list
+val turn : game_state -> game_state
 (** Returns the state of a CPU player alongside an altered board after one CPU
     turn. The CPU cannot move tiles, but will place down any tiles it can
     otherwise. **)

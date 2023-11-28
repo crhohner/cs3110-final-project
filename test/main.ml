@@ -382,21 +382,23 @@ let board_tests =
   ]
 
 let player_1 =
-  { hand = [ Joker; Num { num = 1; color = Blue } ]; name = "Alice" }
+  { hand = [ Joker; Num { num = 1; color = Blue } ]; name = "Alice" ; isCpu = false}
 
 let player_2 =
   {
     hand = [ Num { num = 2; color = Yellow }; Num { num = 10; color = Blue } ];
     name = "Grace";
+    isCpu = false;
   }
 
 let player_3 =
-  { hand = [ Num { num = 8; color = Red }; Joker ]; name = "David" }
+  { hand = [ Num { num = 8; color = Red }; Joker ]; name = "David" ; isCpu = false}
 
 let player_4 =
   {
     hand = [ Num { num = 9; color = Red }; Num { num = 2; color = Yellow } ];
     name = "Joy";
+    isCpu = false;
   }
 
 let gs_no_players = { players = []; board = board1; deck = [] }
@@ -412,9 +414,9 @@ let gs_multi_player =
     deck = [];
   }
 
-let make_single_player = Game.make [ "Alice" ]
-let make_two_players = Game.make [ "Alice"; "Grace" ]
-let make_multi_player = Game.make [ "Alice"; "Grace"; "David"; "Joy" ]
+let make_single_player = Game.make [ "Alice" ] []
+let make_two_players = Game.make [ "Alice"; "Grace" ] []
+let make_multi_player = Game.make [ "Alice"; "Grace"; "David"; "Joy" ] []
 
 (* -------------------- Helpers to test make -------------------- *)
 (* Helper that maps given tile to an integer *)
@@ -466,11 +468,11 @@ let tiles3 =
     Num { color = Red; num = 13 };
   ]
 
-let winner1 = { hand = []; name = "manolis ;)" }
-let winner2 = { hand = []; name = "still manolis ;)" }
-let loser1 = { hand = tiles1; name = "loser1" }
-let loser2 = { hand = tiles2; name = "loser2" }
-let loser3 = { hand = tiles3; name = "loser3" }
+let winner1 = { hand = []; name = "manolis ;)" ; isCpu = false }
+let winner2 = { hand = []; name = "still manolis ;)" ; isCpu = false}
+let loser1 = { hand = tiles1; name = "loser1" ; isCpu = false}
+let loser2 = { hand = tiles2; name = "loser2" ; isCpu = false}
+let loser3 = { hand = tiles3; name = "loser3" ; isCpu = false}
 
 let game_tests =
   [
