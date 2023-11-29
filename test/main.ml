@@ -382,7 +382,11 @@ let board_tests =
   ]
 
 let player_1 =
-  { hand = [ Joker; Num { num = 1; color = Blue } ]; name = "Alice" ; isCpu = false}
+  {
+    hand = [ Joker; Num { num = 1; color = Blue } ];
+    name = "Alice";
+    isCpu = false;
+  }
 
 let player_2 =
   {
@@ -392,7 +396,11 @@ let player_2 =
   }
 
 let player_3 =
-  { hand = [ Num { num = 8; color = Red }; Joker ]; name = "David" ; isCpu = false}
+  {
+    hand = [ Num { num = 8; color = Red }; Joker ];
+    name = "David";
+    isCpu = false;
+  }
 
 let player_4 =
   {
@@ -468,11 +476,11 @@ let tiles3 =
     Num { color = Red; num = 13 };
   ]
 
-let winner1 = { hand = []; name = "manolis ;)" ; isCpu = false }
-let winner2 = { hand = []; name = "still manolis ;)" ; isCpu = false}
-let loser1 = { hand = tiles1; name = "loser1" ; isCpu = false}
-let loser2 = { hand = tiles2; name = "loser2" ; isCpu = false}
-let loser3 = { hand = tiles3; name = "loser3" ; isCpu = false}
+let winner1 = { hand = []; name = "manolis ;)"; isCpu = false }
+let winner2 = { hand = []; name = "still manolis ;)"; isCpu = false }
+let loser1 = { hand = tiles1; name = "loser1"; isCpu = false }
+let loser2 = { hand = tiles2; name = "loser2"; isCpu = false }
+let loser3 = { hand = tiles3; name = "loser3"; isCpu = false }
 
 let game_tests =
   [
@@ -882,7 +890,7 @@ let cpu_tests =
       assert_equal h2_pairs (Cpu.check_pairs h2) );
     ( "test check_pairs - same sum pair" >:: fun _ ->
       assert_equal (Cpu.check_pairs h3) h3_pairs );
-    (*check threes tests*)
+    (*check_threes tests*)
     ( "test check_threes - less than three tiles" >:: fun _ ->
       assert_equal None (Cpu.check_threes [ Num { num = 1; color = Yellow } ])
     );
@@ -916,7 +924,142 @@ let cpu_tests =
              Num { num = 5; color = Blue };
              Num { num = 6; color = Blue };
            ]) );
-    (*insert some tests for same num here*)
+    ( "test check_threes - three tiles with same number, different colors (1 \
+       valid option)"
+    >:: fun _ ->
+      assert_equal
+        (Some
+           [
+             Num { num = 4; color = Blue };
+             Num { num = 4; color = Black };
+             Num { num = 4; color = Red };
+           ])
+        (Cpu.check_threes
+           [
+             Num { num = 4; color = Red };
+             Num { num = 5; color = Black };
+             Num { num = 4; color = Black };
+             Num { num = 4; color = Blue };
+             Num { num = 7; color = Yellow };
+             Num { num = 7; color = Yellow };
+           ]) );
+    ( "test check_threes - three tiles with same number, different colors (2 \
+       valid options)"
+    >:: fun _ ->
+      assert_equal
+        (Some
+           [
+             Num { num = 2; color = Yellow };
+             Num { num = 2; color = Red };
+             Num { num = 2; color = Black };
+           ])
+        (Cpu.check_threes
+           [
+             Num { num = 3; color = Red };
+             Num { num = 3; color = Yellow };
+             Num { num = 2; color = Black };
+             Num { num = 2; color = Red };
+             Num { num = 5; color = Black };
+             Num { num = 3; color = Blue };
+             Num { num = 2; color = Yellow };
+             Num { num = 2; color = Red };
+           ]) );
+    ( "test check_threes - no valid options 1" >:: fun _ ->
+      assert_equal None
+        (Cpu.check_threes
+           [
+             Num { num = 1; color = Yellow };
+             Num { num = 2; color = Blue };
+             Num { num = 4; color = Black };
+             Num { num = 1; color = Yellow };
+             Num { num = 1; color = Black };
+           ]) );
+    ( "test check_threes - no valid options 2" >:: fun _ ->
+      assert_equal None
+        (Cpu.check_threes
+           [
+             Num { num = 1; color = Yellow };
+             Num { num = 4; color = Blue };
+             Num { num = 1; color = Yellow };
+             Num { num = 1; color = Blue };
+             Num { num = 4; color = Red };
+             Num { num = 1; color = Blue };
+           ]) );
+    ( "test check_threes - one Joker, two tiles with same number (1 valid \
+       option)"
+    >:: fun _ ->
+      assert_equal
+        (Some
+           [
+             Num { num = 2; color = Red }; Num { num = 2; color = Blue }; Joker;
+           ])
+        (Cpu.check_threes
+           [
+             Num { num = 5; color = Black };
+             Num { num = 2; color = Blue };
+             Joker;
+             Num { num = 2; color = Blue };
+             Num { num = 2; color = Red };
+             Num { num = 1; color = Yellow };
+           ]) );
+    ( "test check_threes - one Joker, two tiles with same number (2 valid \
+       options)"
+    >:: fun _ ->
+      assert_equal
+        (Some
+           [
+             Num { num = 10; color = Blue };
+             Num { num = 10; color = Black };
+             Joker;
+           ])
+        (Cpu.check_threes
+           [
+             Joker;
+             Num { num = 10; color = Black };
+             Num { num = 1; color = Yellow };
+             Num { num = 1; color = Yellow };
+             Num { num = 1; color = Blue };
+             Num { num = 10; color = Blue };
+             Joker;
+           ]) );
+    ( "test check_threes - one Joker, two tiles with same color (one with \
+       number 13)"
+    >:: fun _ ->
+      assert_equal
+        (Some
+           [
+             Joker;
+             Num { num = 12; color = Blue };
+             Num { num = 13; color = Blue };
+           ])
+        (Cpu.check_threes
+           [
+             Num { num = 12; color = Blue };
+             Joker;
+             Num { num = 13; color = Blue };
+             Num { num = 1; color = Yellow };
+             Joker;
+             Num { num = 7; color = Black };
+           ]) );
+    ( "test check_threes - one Joker, two tiles with same color (one with \
+       number 1)"
+    >:: fun _ ->
+      assert_equal
+        (Some
+           [
+             Num { num = 1; color = Yellow };
+             Num { num = 2; color = Yellow };
+             Joker;
+           ])
+        (Cpu.check_threes
+           [
+             Num { num = 1; color = Yellow };
+             Num { num = 10; color = Yellow };
+             Joker;
+             Num { num = 2; color = Yellow };
+             Num { num = 3; color = Black };
+             Num { num = 4; color = Blue };
+           ]) );
     ( "test check_threes - one Joker, same color" >:: fun _ ->
       assert_equal
         (Some
@@ -956,308 +1099,358 @@ let cpu_tests =
            ]) );
     ( "test check_threes - only two Jokers" >:: fun _ ->
       assert_equal None (Cpu.check_threes [ Joker; Joker ]) );
-  (let place_pair_test out in1 in2 =
-    let actual = (Cpu.place_pair in1 in2) in
-    assert_equal ~msg:("place_pair expected: \n" ^ (print_board out) ^ 
-      "\nactual: \n" ^ (print_board actual))
-    out actual
-  in "place_pair tests" >::: 
-    let board_1 = 
-      [
-        [
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4};
-        ];
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4};
-        ];
-      ]
-    in let board_2 = 
-      [
-        [
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4};
-          Num {color=Yellow; num=5}; 
-          Num {color=Yellow; num=6};
-        ];
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4};
-        ];
-      ]
-    in let board_3 = 
-      [
-        [
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4};
-        ];
-        [
-          Num {color=Yellow; num=1};
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4};
-        ];
-      ]
-    in let board_4 = 
-      [
-        [
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4};
-          Joker; 
-          Num {color=Yellow; num=6};
-        ];
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4};
-        ];
-      ]
-    in let board_5 = 
-      [
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4};
-        ];
-      ]
-    in let board_6 = 
-      [
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Yellow; num=2}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4};
-          Num {color=Yellow; num=5}; 
-          Num {color=Yellow; num=6};
-        ];
-      ]
-    in let pair_1 = [Num {color=Yellow; num=5}; Num {color=Yellow; num=6};] in
-    let pair_2 = [Num {color=Yellow; num=1}; Num {color=Yellow; num=2};] in
-    let pair_3 = [Num {color=Yellow; num=7}; Num {color=Yellow; num=8};] in
-    let pair_4 = [Joker; Num {color=Yellow; num=6};] in
-    let pair_5 = [Num {color=Yellow; num=8}; Num {color=Yellow; num=8};] in
-    let debug_1 = [Num {color=Yellow; num=4}; Num {color=Yellow; num=7}; Num {color=Yellow; num=8};] in
-    let debug_2 = [Num {color=Yellow; num=4}; Joker; Num {color=Yellow; num=6};] in
-    let debug_test out in1 =
-      let actual = (Cpu.check_threes in1) in
-      assert_equal ~msg:("check_threes debug expected: \n" ^ 
-      (match out with Some a -> print_tile_list a | None -> print_tile_list []) ^ 
-      "\nactual: \n" ^ (match actual with Some a -> print_tile_list a | None -> print_tile_list []))
-      out actual in
-    [
-      "R=1 append to end" >:: (fun _ -> place_pair_test board_2 board_1 pair_1);
-      "R!=1 append to front" >:: (fun _ -> place_pair_test board_3 board_1 pair_2);
-      "No placement" >:: (fun _ -> place_pair_test board_1 board_1 pair_5);
-      "No placement ex1" >:: (fun _ -> place_pair_test board_1 board_1 pair_3);
-      "No placement check" >:: (fun _ -> debug_test (None) debug_1);
-      "R≠1 append end Joker" >:: (fun _ -> place_pair_test board_4 board_1 pair_4);
-      "Joker check" >:: (fun _ -> debug_test (Some debug_2) debug_2);
-      "R≠1 append to end" >:: (fun _ -> place_pair_test board_6 board_5 pair_1);
-    ]);
-  
-  (let place_one_test out in1 in2 =
-    let actual = (Cpu.place_one in1 in2) in
-    assert_equal ~msg:("place_one expected: \n" ^ (print_board out) ^ 
-      "\nactual: \n" ^ (print_board actual))
-    out actual
-  in "place_one tests" >::: 
-    let board_1 = 
-      [
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Black; num=3}; 
-          Num {color=Red; num=3};
-        ];
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Blue; num=10}; 
-          Num {color=Black; num=10}; 
-          Num {color=Red; num=10};
-        ];
-        [
-          Num {color=Black; num=9}; 
-          Num {color=Black; num=10}; 
-          Num {color=Black; num=11};
-        ];
-      ]
-    in let board_2 = 
-      [
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Black; num=3}; 
-          Num {color=Red; num=3};
-          ];
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5}; 
-          Num {color=Yellow; num=6}
-        ];
-        [
-          Num {color=Blue; num=10}; 
-          Num {color=Black; num=10}; 
-          Num {color=Red; num=10};
-        ];
-        [
-          Num {color=Black; num=9}; 
-          Num {color=Black; num=10}; 
-          Num {color=Black; num=11};
-        ];
-      ]
-    in let board_3 = 
-      [
-        [
-          Num {color=Blue; num=3}; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Black; num=3};  
-          Num {color=Red; num=3};
-        ];
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Blue; num=10}; 
-          Num {color=Black; num=10}; 
-          Num {color=Red; num=10};
-        ];
-        [
-          Num {color=Black; num=9}; 
-          Num {color=Black; num=10}; 
-          Num {color=Black; num=11};
-        ];
-      ]
-    in let board_4 = 
-      [
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Black; num=3}; 
-          Num {color=Red; num=3};
-        ];
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Yellow; num=10}; 
-          Num {color=Blue; num=10}; 
-          Num {color=Black; num=10}; 
-          Num {color=Red; num=10};
-        ];
-        [
-          Num {color=Black; num=9}; 
-          Num {color=Black; num=10}; 
-          Num {color=Black; num=11};
-        ];
-      ]
-    in let board_5 = 
-      [
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Black; num=3}; 
-          Num {color=Red; num=3};
-        ];
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Blue; num=10}; 
-          Num {color=Black; num=10}; 
-          Num {color=Red; num=10};
-        ];
-        [
-          Num {color=Black; num=8}; 
-          Num {color=Black; num=9}; 
-          Num {color=Black; num=10}; 
-          Num {color=Black; num=11};
-        ];
-      ]
-    in let board_j = 
-      [
-        [
-          Joker; 
-          Num {color=Yellow; num=3}; 
-          Num {color=Black; num=3}; 
-          Num {color=Red; num=3};
-        ];
-        [
-          Num {color=Yellow; num=3}; 
-          Num {color=Yellow; num=4}; 
-          Num {color=Yellow; num=5};
-        ];
-        [
-          Num {color=Blue; num=10}; 
-          Num {color=Black; num=10}; 
-          Num {color=Red; num=10};
-        ];
-        [
-          Num {color=Black; num=9}; 
-          Num {color=Black; num=10}; 
-          Num {color=Black; num=11};
-        ];
-      ]
-    in let tile_1 = Num {color=Yellow; num=6} in
-    let tile_2 = Num {color=Blue; num=3} in
-    let tile_3 = Num {color=Yellow; num=10} in
-    let tile_4 = Num {color=Black; num=8} in
-    let tile_5 = Num {color=Black; num=13} in
-    let tile_6 = Num {color=Red; num=3} in
-    [ (*Note: t1/type1 refers to when an ascending numerical sequence is added to,
-        t2/type2 refers to when a uniform numerical sequence is added to*)
-      "Append to end t1" >:: (fun _ -> place_one_test board_2 board_1 tile_1);
-      "Append to front t1" >:: (fun _ -> place_one_test board_5 board_1 tile_4);
-      "R=1 append t2" >:: (fun _ -> place_one_test board_3 board_1 tile_2);
-      "R≠1 append t2" >:: (fun _ -> place_one_test board_4 board_1 tile_3);
-      "Joker" >:: (fun _ -> place_one_test board_j board_1 Joker);
-      "No placement t1" >:: (fun _ -> place_one_test board_1 board_1 tile_5);
-      "No placement t2" >:: (fun _ -> place_one_test board_1 board_1 tile_6);
-    ]);
-]
+    (* place_pair tests *)
+    (let place_pair_test out in1 in2 =
+       let actual = Cpu.place_pair in1 in2 in
+       assert_equal
+         ~msg:
+           ("place_pair expected: \n" ^ print_board out ^ "\nactual: \n"
+          ^ print_board actual)
+         out actual
+     in
+     "place_pair tests"
+     >:::
+     let board_1 =
+       [
+         [
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+         ];
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+         ];
+       ]
+     in
+     let board_2 =
+       [
+         [
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+           Num { color = Yellow; num = 6 };
+         ];
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+         ];
+       ]
+     in
+     let board_3 =
+       [
+         [
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+         ];
+         [
+           Num { color = Yellow; num = 1 };
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+         ];
+       ]
+     in
+     let board_4 =
+       [
+         [
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Joker;
+           Num { color = Yellow; num = 6 };
+         ];
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+         ];
+       ]
+     in
+     let board_5 =
+       [
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+         ];
+       ]
+     in
+     let board_6 =
+       [
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Yellow; num = 2 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+           Num { color = Yellow; num = 6 };
+         ];
+       ]
+     in
+     let pair_1 =
+       [ Num { color = Yellow; num = 5 }; Num { color = Yellow; num = 6 } ]
+     in
+     let pair_2 =
+       [ Num { color = Yellow; num = 1 }; Num { color = Yellow; num = 2 } ]
+     in
+     let pair_3 =
+       [ Num { color = Yellow; num = 7 }; Num { color = Yellow; num = 8 } ]
+     in
+     let pair_4 = [ Joker; Num { color = Yellow; num = 6 } ] in
+     let pair_5 =
+       [ Num { color = Yellow; num = 8 }; Num { color = Yellow; num = 8 } ]
+     in
+     let debug_1 =
+       [
+         Num { color = Yellow; num = 4 };
+         Num { color = Yellow; num = 7 };
+         Num { color = Yellow; num = 8 };
+       ]
+     in
+     let debug_2 =
+       [
+         Num { color = Yellow; num = 4 }; Joker; Num { color = Yellow; num = 6 };
+       ]
+     in
+     let debug_test out in1 =
+       let actual = Cpu.check_threes in1 in
+       assert_equal
+         ~msg:
+           ("check_threes debug expected: \n"
+           ^ (match out with
+             | Some a -> print_tile_list a
+             | None -> print_tile_list [])
+           ^ "\nactual: \n"
+           ^
+           match actual with
+           | Some a -> print_tile_list a
+           | None -> print_tile_list [])
+         out actual
+     in
+     [
+       ("R=1 append to end" >:: fun _ -> place_pair_test board_2 board_1 pair_1);
+       ( "R!=1 append to front" >:: fun _ ->
+         place_pair_test board_3 board_1 pair_2 );
+       ("No placement" >:: fun _ -> place_pair_test board_1 board_1 pair_5);
+       ("No placement ex1" >:: fun _ -> place_pair_test board_1 board_1 pair_3);
+       ("No placement check" >:: fun _ -> debug_test None debug_1);
+       ( "R≠1 append end Joker" >:: fun _ ->
+         place_pair_test board_4 board_1 pair_4 );
+       ("Joker check" >:: fun _ -> debug_test (Some debug_2) debug_2);
+       ("R≠1 append to end" >:: fun _ -> place_pair_test board_6 board_5 pair_1);
+     ]);
+    (let place_one_test out in1 in2 =
+       let actual = Cpu.place_one in1 in2 in
+       assert_equal
+         ~msg:
+           ("place_one expected: \n" ^ print_board out ^ "\nactual: \n"
+          ^ print_board actual)
+         out actual
+     in
+     "place_one tests"
+     >:::
+     let board_1 =
+       [
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Black; num = 3 };
+           Num { color = Red; num = 3 };
+         ];
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Blue; num = 10 };
+           Num { color = Black; num = 10 };
+           Num { color = Red; num = 10 };
+         ];
+         [
+           Num { color = Black; num = 9 };
+           Num { color = Black; num = 10 };
+           Num { color = Black; num = 11 };
+         ];
+       ]
+     in
+     let board_2 =
+       [
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Black; num = 3 };
+           Num { color = Red; num = 3 };
+         ];
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+           Num { color = Yellow; num = 6 };
+         ];
+         [
+           Num { color = Blue; num = 10 };
+           Num { color = Black; num = 10 };
+           Num { color = Red; num = 10 };
+         ];
+         [
+           Num { color = Black; num = 9 };
+           Num { color = Black; num = 10 };
+           Num { color = Black; num = 11 };
+         ];
+       ]
+     in
+     let board_3 =
+       [
+         [
+           Num { color = Blue; num = 3 };
+           Num { color = Yellow; num = 3 };
+           Num { color = Black; num = 3 };
+           Num { color = Red; num = 3 };
+         ];
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Blue; num = 10 };
+           Num { color = Black; num = 10 };
+           Num { color = Red; num = 10 };
+         ];
+         [
+           Num { color = Black; num = 9 };
+           Num { color = Black; num = 10 };
+           Num { color = Black; num = 11 };
+         ];
+       ]
+     in
+     let board_4 =
+       [
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Black; num = 3 };
+           Num { color = Red; num = 3 };
+         ];
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Yellow; num = 10 };
+           Num { color = Blue; num = 10 };
+           Num { color = Black; num = 10 };
+           Num { color = Red; num = 10 };
+         ];
+         [
+           Num { color = Black; num = 9 };
+           Num { color = Black; num = 10 };
+           Num { color = Black; num = 11 };
+         ];
+       ]
+     in
+     let board_5 =
+       [
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Black; num = 3 };
+           Num { color = Red; num = 3 };
+         ];
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Blue; num = 10 };
+           Num { color = Black; num = 10 };
+           Num { color = Red; num = 10 };
+         ];
+         [
+           Num { color = Black; num = 8 };
+           Num { color = Black; num = 9 };
+           Num { color = Black; num = 10 };
+           Num { color = Black; num = 11 };
+         ];
+       ]
+     in
+     let board_j =
+       [
+         [
+           Joker;
+           Num { color = Yellow; num = 3 };
+           Num { color = Black; num = 3 };
+           Num { color = Red; num = 3 };
+         ];
+         [
+           Num { color = Yellow; num = 3 };
+           Num { color = Yellow; num = 4 };
+           Num { color = Yellow; num = 5 };
+         ];
+         [
+           Num { color = Blue; num = 10 };
+           Num { color = Black; num = 10 };
+           Num { color = Red; num = 10 };
+         ];
+         [
+           Num { color = Black; num = 9 };
+           Num { color = Black; num = 10 };
+           Num { color = Black; num = 11 };
+         ];
+       ]
+     in
+     let tile_1 = Num { color = Yellow; num = 6 } in
+     let tile_2 = Num { color = Blue; num = 3 } in
+     let tile_3 = Num { color = Yellow; num = 10 } in
+     let tile_4 = Num { color = Black; num = 8 } in
+     let tile_5 = Num { color = Black; num = 13 } in
+     let tile_6 = Num { color = Red; num = 3 } in
+     [
+       (*Note: t1/type1 refers to when an ascending numerical sequence is added
+         to, t2/type2 refers to when a uniform numerical sequence is added to*)
+       ("Append to end t1" >:: fun _ -> place_one_test board_2 board_1 tile_1);
+       ("Append to front t1" >:: fun _ -> place_one_test board_5 board_1 tile_4);
+       ("R=1 append t2" >:: fun _ -> place_one_test board_3 board_1 tile_2);
+       ("R≠1 append t2" >:: fun _ -> place_one_test board_4 board_1 tile_3);
+       ("Joker" >:: fun _ -> place_one_test board_j board_1 Joker);
+       ("No placement t1" >:: fun _ -> place_one_test board_1 board_1 tile_5);
+       ("No placement t2" >:: fun _ -> place_one_test board_1 board_1 tile_6);
+     ]);
+  ]
 
 let suite =
   "test suite for rummikaml"
