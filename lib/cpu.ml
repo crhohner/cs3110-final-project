@@ -164,7 +164,10 @@ let rec find_num_pair_j (l : tile list) : tile list option =
   match l with
   | Num n1 :: Num n2 :: t ->
       if n1.num + 2 = n2.num then Some [ Num n1; Joker; Num n2 ]
-      else if n1.num + 1 = n2.num then Some [ Num n1; Num n2; Joker ]
+      else if n1.num + 1 = n2.num && n2.num <> 13 then
+        Some [ Num n1; Num n2; Joker ]
+      else if n1.num + 1 = n2.num && n1.num <> 1 then
+        Some [ Joker; Num n1; Num n2 ]
       else find_num_pair_j (Num n2 :: t)
   | _ -> None
 
