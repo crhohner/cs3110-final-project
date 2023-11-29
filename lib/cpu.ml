@@ -125,6 +125,7 @@ let check_pairs (tiles : tile list) : tile list list =
 (*the two functions below are used to find all sequences from the two sort
   outcomes that do not require a joker. *)
 
+(*start here*)
 (*Returns a sequence of three ascending tiles given a list of tiles, or [None]
   if no such sequence exists. Requires: tiles in [l] are all the same color and
   sorted in ascending order, and there are no duplicates in [l].*)
@@ -159,18 +160,18 @@ let rec check_seqs find (l : ('a * tile list) list) : tile list option =
 (*Returns an option containing a three-tile ascending sequence that can be made
   from two tiles in [l] and a single joker or [None] if no such sequence can be
   found.*)
-let rec find_num_pair_j (l : tile list) : tile list option =
+let rec find_color_pair_j (l : tile list) : tile list option =
   match l with
   | Num n1 :: Num n2 :: t ->
       if n1.num + 2 = n2.num then Some [ Num n1; Joker; Num n2 ]
       else if n1.num + 1 = n2.num then Some [ Num n1; Num n2; Joker ]
-      else find_num_seq (Num n2 :: t)
+      else find_color_pair_j (Num n2 :: t)
   | _ -> None
 
 (*Returns an option containing a three-tile same number, different color
   sequence that can be made from two tiles in [l] and a single joker or [None]
   if no such sequence can be found.*)
-let rec find_color_pair_j (l : tile list) : tile list option =
+let rec find_num_pair_j (l : tile list) : tile list option =
   match l with
   | Num n1 :: Num n2 :: t -> Some [ Num n1; Num n2; Joker ]
   | _ -> None
@@ -199,7 +200,7 @@ let check_threes l =
   | _ ->
       if joker_count > 0 then
         match
-          (check_seqs find_num_pair_j n, check_seqs find_color_pair_j c)
+          (check_seqs find_color_pair_j c, check_seqs find_num_pair_j n)
         with
         | Some out, None -> Some out
         | None, Some out -> Some out
