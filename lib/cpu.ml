@@ -217,22 +217,6 @@ let check_threes l =
 
 let place_three b l = b @ [ l ]
 
-let rec place_pair b l =
-  let tile1 = List.nth l 0 in
-  let tile2 = List.nth l 1 in
-  match b with
-  | [] -> []
-  | h :: t ->
-      if
-        check_threes [ tile1; tile2; List.hd h ]
-        = Some [ tile1; tile2; List.hd h ]
-      then (l @ h) :: t
-      else if
-        check_threes [ List.hd (List.rev h); tile1; tile2 ]
-        = Some [ List.hd (List.rev h); tile1; tile2 ]
-      then (h @ l) :: t
-      else h :: place_pair t l
-
 (** Returns iff all the tiles in a list of colors are composed of colors that
     differ from one another. Jokers are disregarded in determining the returned
     boolean. Helper function for color_seq.*)
@@ -277,15 +261,35 @@ let rec place_one b t =
   | h :: tl ->
       let rev_h = List.rev h in
       if
+        (color_vary h [] |> not) &&
         check_threes [ t; List.hd h; List.nth h 1 ]
         = Some [ t; List.hd h; List.nth h 1 ]
       then (t :: h) :: tl
       else if
+        (color_vary h [] |> not) &&
         check_threes [ List.nth rev_h 1; List.hd rev_h; t ]
         = Some [ List.nth rev_h 1; List.hd rev_h; t ]
       then (h @ [ t ]) :: tl
       else if List.length h = 3 && color_seq h t then (t :: h) :: tl
       else h :: place_one tl t
+
+let rec place_pair b l =
+  let tile1 = List.nth l 0 in
+  let tile2 = List.nth l 1 in
+  match b with
+  | [] -> []
+  | h :: t ->
+      if
+        (color_vary h [] |> not) &&
+        check_threes [ tile1; tile2; List.hd h ]
+        = Some [ tile1; tile2; List.hd h ]
+      then (l @ h) :: t
+      else if
+        (color_vary h [] |> not) &&
+        check_threes [ List.hd (List.rev h); tile1; tile2 ]
+        = Some [ List.hd (List.rev h); tile1; tile2 ]
+      then (h @ l) :: t
+      else h :: place_pair t l
 
 (**Returns a board with a pair of tiles from [l] added to it alongide that pair.
    If no pair can be added, returns an unaltered board and ([]). Requires: [b]
