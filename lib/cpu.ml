@@ -259,19 +259,27 @@ let rec place_one b t =
   match b with
   | [] -> []
   | h :: tl ->
-      let rev_h = List.rev h in
-      if
-        (color_vary h [] |> not) &&
-        check_threes [ t; List.hd h; List.nth h 1 ]
-        = Some [ t; List.hd h; List.nth h 1 ]
-      then (t :: h) :: tl
-      else if
-        (color_vary h [] |> not) &&
-        check_threes [ List.nth rev_h 1; List.hd rev_h; t ]
-        = Some [ List.nth rev_h 1; List.hd rev_h; t ]
-      then (h @ [ t ]) :: tl
-      else if List.length h = 3 && color_seq h t then (t :: h) :: tl
+      let lst1 = t :: h in
+      let lst2 = h @ [ t ] in
+      let t1 = List.nth lst1 0 in
+      let t2 = List.nth lst1 1 in
+      let t3 = List.nth lst1 2 in
+      let col = snd (Model.get_color t1 t2 t3) in
+      let lst2_rev = List.rev lst2 in
+      let t1end = List.nth lst2_rev 0 in
+      let t2end = List.nth lst2_rev 1 in
+      let t3end = List.nth lst2_rev 2 in
+      if Model.valid_row col (snd (Model.get_num t1 t2 t3)) lst1 then lst1 :: tl
+      else if Model.valid_row col (snd (Model.get_num t1end t2end t3end)) lst2
+      then lst2 :: tl
       else h :: place_one tl t
+
+(*let rec place_pair b l = let tile1 = List.nth l 0 in let tile2 = List.nth l 1
+  in match b with | [] -> [] | h :: t -> if (color_vary h [] |> not) &&
+  check_threes [ tile1; tile2; List.hd h ] = Some [ tile1; tile2; List.hd h ]
+  then (l @ h) :: t else if (color_vary h [] |> not) && check_threes [ List.hd
+  (List.rev h); tile1; tile2 ] = Some [ List.hd (List.rev h); tile1; tile2 ]
+  then (h @ l) :: t else h :: place_pair t l*)
 
 let rec place_pair b l =
   let tile1 = List.nth l 0 in
@@ -279,17 +287,25 @@ let rec place_pair b l =
   match b with
   | [] -> []
   | h :: t ->
-      if
-        (color_vary h [] |> not) &&
-        check_threes [ tile1; tile2; List.hd h ]
-        = Some [ tile1; tile2; List.hd h ]
-      then (l @ h) :: t
-      else if
-        (color_vary h [] |> not) &&
-        check_threes [ List.hd (List.rev h); tile1; tile2 ]
-        = Some [ List.hd (List.rev h); tile1; tile2 ]
-      then (h @ l) :: t
+      let lst1 = tile1 :: tile2 :: h in
+      let lst2 = h @ [ tile1 ] @ [ tile2 ] in
+      let t1 = List.nth lst1 0 in
+      let t2 = List.nth lst1 1 in
+      let t3 = List.nth lst1 2 in
+      let col = snd (Model.get_color t1 t2 t3) in
+      let lst2_rev = List.rev lst2 in
+      let t1end = List.nth lst2_rev 0 in
+      let t2end = List.nth lst2_rev 1 in
+      let t3end = List.nth lst2_rev 2 in
+      if Model.valid_row col (snd (Model.get_num t1 t2 t3)) lst1 then lst1 :: t
+      else if Model.valid_row col (snd (Model.get_num t1end t2end t3end)) lst2
+      then lst2 :: t
       else h :: place_pair t l
+
+(* if color_vary h [] |> not && check_threes [ tile1; tile2; List.hd h ] = Some
+   [ tile1; tile2; List.hd h ] then (l @ h) :: t else if color_vary h [] |> not
+   && check_threes [ List.hd (List.rev h); tile1; tile2 ] = Some [ List.hd
+   (List.rev h); tile1; tile2 ] then (h @ l) :: t else h :: place_pair t l*)
 
 (**Returns a board with a pair of tiles from [l] added to it alongide that pair.
    If no pair can be added, returns an unaltered board and ([]). Requires: [b]

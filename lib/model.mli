@@ -39,6 +39,30 @@ val remove : int -> 'a list -> 'a * 'a list
     as an option. Requires: 0 <= [i] < length of [lst]. Raises Invalid_argument
     with invalid [i].*)
 
+val check_color : color -> tile list -> bool
+(** given a tile list and color, checks that all the tiles are same color*)
+
+val check_num : int -> tile list -> bool
+(** given a tile list and integer, checks that all the tiles are same number*)
+
+val check_rowcolors : tile list -> bool
+(** given list of tiles of the same number, checks if their colors are different*)
+
+val check_rownums : tile list -> bool
+(** given a list of tiles of the same color, checks that they are in consecutive
+    off-by-one order*)
+
+val get_color : tile -> tile -> tile -> bool * color
+(** finds the color of the first non-Joker tile, returns: (false, Yellow) if no
+    color found, otherwise (true, color)*)
+
+val get_num : tile -> tile -> tile -> bool * int
+(** finds the number of the first non-Joker tile, returns: (false, 0) if no
+    number found, otherwise (true, num)*)
+
+val valid_row : color -> int -> tile list -> bool
+(** checks if the list of tiles is valid given a color and number*)
+
 (** A BoardType represents a Rummikaml board *)
 module type BoardType = sig
   (*Representation type*)
