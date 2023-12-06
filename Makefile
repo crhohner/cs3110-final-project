@@ -12,3 +12,9 @@ play:
 zip:
 	rm -f rummikaml.zip
 	zip -r rummikaml.zip . -x@exclude.lst
+
+doc:
+	dune build @doc
+
+opendoc: doc
+				@bash opendoc.sh
