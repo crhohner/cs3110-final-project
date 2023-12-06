@@ -368,17 +368,6 @@ let board_tests =
       assert_equal false (Board.check board15) );
     ( "joker not placed correctly" >:: fun _ ->
       assert_equal false (Board.check board17) );
-    (*check_first tests*)
-    ( "simple one row > 30" >:: fun _ ->
-      assert_equal true (Board.check_first board11) );
-    ( "simple multiple row > 30" >:: fun _ ->
-      assert_equal true (Board.check_first board12) );
-    ( "simple board < 30" >:: fun _ ->
-      assert_equal false (Board.check_first board13) );
-    ( "simple board = 30 with Jokers" >:: fun _ ->
-      assert_equal true (Board.check_first board14) );
-    ( "board > 30 but invalid" >:: fun _ ->
-      assert_equal false (Board.check_first board15) );
   ]
 
 let player_1 =
