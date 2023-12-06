@@ -169,7 +169,6 @@ module type BoardType = sig
   val move : t -> int * int -> int * int -> t
   val new_row : t -> tile -> t
   val check : t -> bool
-  val check_first : t -> bool
   val valid_get_loc : tile list list -> int * int -> bool
   val valid_set_loc : tile list list -> int * int -> bool
 end
@@ -255,25 +254,6 @@ module Board : BoardType with type t = tile list list = struct
                     if check_color col l then check_rownums l && check t
                     else false
                   else false))
-
-  (** Helper for check_first, returns sum of tiles in row*)
-  let rec count_tiles (lst : tile list) : int =
-    match lst with
-    | [] -> 0
-    | h :: t -> (
-        match h with
-        | Num n -> n.num + count_tiles t
-        | Joker -> 10 + count_tiles t)
-
-  let rec check_first (board : tile list list) : bool =
-    if check board then
-      let rec tiles b =
-        match b with
-        | [] -> 0
-        | h :: t -> count_tiles h + tiles t
-      in
-      tiles board >= 30
-    else false
 end
 
 (** A GameType represents the whole state of a Rummikaml game *)

@@ -1,4 +1,6 @@
 open Model
+(** Implementation of CPU (computer player) that places as many sets of three
+    tiles, two tiles, and single tiles on the board before its turn ends. *)
 
 val sort_by_num : tile list -> (int * tile list) list
 (** Returns cpu's hand as association list where the keys are tile numbers
@@ -13,7 +15,7 @@ val sort_by_color : tile list -> (color option * tile list) list
 
 val check_threes : tile list -> tile list option
 (** Returns an option containing a valid, ordered sequence of three tiles from a
-    tile list, or [None] if no such sequence can be made. Will use two jokers in
+    tile list, or [None] if no such sequence can be made. Will use two Jokers in
     one turn if necessary. *)
 
 val check_pairs : tile list -> tile list list
@@ -26,12 +28,12 @@ val place_three : tile list list -> tile list -> tile list list
     rule or the same number, different color rule, and has at most two Jokers. *)
 
 val place_pair : tile list list -> tile list -> tile list list
-(** Returns a board with a pair of tiles from [l] placed down at a legal
-    location. If no pair can be placed, returns AN UNALTERED BOARD. *)
+(** Returns a board with a pair of tiles from given tile list [l] placed down at
+    a legal location. If no pair can be placed, returns AN UNALTERED BOARD. *)
 
 val place_one : tile list list -> tile -> tile list list
-(** Returns a board with a tile from [l] placed down at a legal location. If no
-    tile can be placed, returns AN UNALTERED BOARD. *)
+(** Returns a board with a tile from given tile list [l] placed down at a legal
+    location. If no tile can be placed, returns AN UNALTERED BOARD. *)
 
 val turn : game_state -> game_state
 (** Returns the state of a CPU player alongside an altered board after one CPU

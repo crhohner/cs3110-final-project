@@ -1,9 +1,11 @@
+(** Type representing the color of a tile. *)
 type color =
   | Yellow
   | Red
   | Blue
   | Black
 
+(** Type representing a tile - may be Joker or a tile with a number and color. *)
 type tile =
   | Joker
   | Num of {
@@ -16,23 +18,31 @@ type player = {
   name : string;
   isCpu : bool;
 }
+(** Type representing a player - player assigned hand of tiles, name, and listed
+    as CPU or not CPU. *)
 
 type game_state = {
   players : player list;
   board : tile list list;
   deck : tile list;
 }
+(** Type representing the state of the game during a round - indicates players,
+    the current state of the board, and the deck of tiles left (not in the hands
+    of the players or on the board). *)
 
 val insert : 'a -> 'a list -> int -> 'a list
-(** Returns [lst] with [ele] inserted at index [i]. Requires: 0 <= [i] <= length
-    of [lst]. Raises Invalid_argument with invalid [i].*)
+(** Returns [lst] with given element [ele] inserted at index [i]. Requires: 0 <=
+    [i] <= length of [lst]. Raises Invalid_argument with invalid [i].*)
 
 val num_of_tile : tile -> int
-(** Returns a numerical representation of a tile. ELABORATE *)
+(** Returns a numerical representation of a given tile [t]. Every tile is
+    assigned an unique integer calculated based on their color and numbering
+    (Joker is 0). *)
 
 val replace : 'a -> 'a list -> int -> 'a list
-(** Returns [lst] with [ele] in place of the [i]th element of [lst]. Requires: 0
-    <= [i] < length of [lst]. Raises Invalid_argument with invalid [i].*)
+(** Returns [lst] with given element [ele] in place of the [i]th element of
+    [lst]. Requires: 0 <= [i] < length of [lst]. Raises Invalid_argument with
+    invalid [i].*)
 
 val remove : int -> 'a list -> 'a * 'a list
 (** Returns [lst] with the [i]th element removed, along with the removed element
@@ -40,79 +50,89 @@ val remove : int -> 'a list -> 'a * 'a list
     with invalid [i].*)
 
 val check_color : color -> tile list -> bool
-(** given a tile list and color, checks that all the tiles are same color*)
+(** Given a tile list [tlst] and color [c], checks that all the tiles are of the
+    same color [c].*)
 
 val check_num : int -> tile list -> bool
-(** given a tile list and integer, checks that all the tiles are same number*)
+(** Given a tile list [tlst] and integer [n], checks that all the tiles are of
+    the same number [n].*)
 
 val check_rowcolors : tile list -> bool
-(** given list of tiles of the same number, checks if their colors are different*)
+(** Given list of tiles of the same number, checks if their colors are
+    different. *)
 
 val check_rownums : tile list -> bool
-(** given a list of tiles of the same color, checks that they are in consecutive
-    off-by-one order*)
+(** Given a list of tiles of the same color, checks that they are in consecutive
+    off-by-one order. *)
 
 val get_color : tile -> tile -> tile -> bool * color
-(** finds the color of the first non-Joker tile, returns: (false, Yellow) if no
-    color found, otherwise (true, color)*)
+(** Finds the color of the first non-Joker tile among the given three tiles
+    [t1], [t2], and [t3]. Returns: [(false, Yellow)] if no color [c] is found,
+    otherwise [(true, c)]. *)
 
 val get_num : tile -> tile -> tile -> bool * int
-(** finds the number of the first non-Joker tile, returns: (false, 0) if no
-    number found, otherwise (true, num)*)
+(** Finds the number of the first non-Joker tile among the given three tiles
+    [t1], [t2], and [t3]. Returns: [(false, 0)] if no number [n] is found,
+    otherwise [(true, n)]. *)
 
 val valid_row : color -> int -> tile list -> bool
-(** checks if the list of tiles is valid given a color and number*)
+(** Checks if a list of tiles is valid given a color and number. *)
 
-(** A BoardType represents a Rummikaml board *)
+(** The signature of a Rummikaml board. *)
 module type BoardType = sig
-  (*Representation type*)
   type t = tile list list
+  (** Type representing a Rummikaml board (tile board). *)
 
   val add : t -> tile -> int * int -> t
-  (**Returns a board with one tile added, given a board [board], a tile [tile],
-     a location [loc] in the form (row, index)*)
+  (** Takes in a board [b], a tile [tl], and a location [loc] in the form of
+      [(row, index)]. Returns: The modified board with the tile [tl] added to
+      [loc]. Requires: [loc] is a valid position on the board, else will throw
+      an exception [Invalid_argument s]. *)
 
   val move : t -> int * int -> int * int -> t
-  (**Returns a board with one tile moved, given a board [board], the tile to be
-     moved's current location [startLoc] in the form (row, index), and a
-     location to be moved to [endLoc] in the form (row, index)*)
+  (** Takes in a board [b], the current location [startLoc] of the tile [t] you
+      want to move on [b], and the new location [endLoc] of [t]. [startLoc] and
+      [endLoc] are both provided in the form [(row, index)]. Returns: The
+      modified board with [t] moved from [startLoc] to [endLoc]. Requires:
+      [startLoc] and [endLoc] are valid positions on the board, else will throw
+      an exception [Invalid_argument s]. *)
 
   val new_row : t -> tile -> t
-  (**Returns a board [board] with a tile [tile] added as a new row beneath any
-     existing rows*)
+  (** Takes in a board [b] and tile [t]. Returns: The modified board with [t]
+      added as a new row beneath any existing rows of [b]. *)
 
   val check : t -> bool
-  (**Returns whether a board configuration is valid, given a board [board]*)
-
-  val check_first : t -> bool
-  (**Returns whether a board configuration is valid, given a board [board]*)
+  (** Returns whether a board configuration is valid, given a board [b]. *)
 
   val valid_get_loc : tile list list -> int * int -> bool
-  (**Returns whether a tile on [board] at [loc] exists: so whether loc is an
-     existing position on the board.*)
+  (** Returns whether tile exists at given location [loc] of board [b]. *)
 
   val valid_set_loc : tile list list -> int * int -> bool
-  (**Returns whether a tile can be placed at [loc] on [board]. (length, 0) makes
-     a new row. *)
+  (** Returns whether a tile can be placed at given location [loc] on board [b].
+      (length, 0) produces a new row. *)
 end
 
 module Board : BoardType
+(** A Rummikaml board. *)
 
-(** A GameType represents the whole state of a Rummikaml game *)
+(** The signature of the state of a Rummikaml game. *)
 module type GameType = sig
   val next_player : game_state -> game_state
-  (**Returns a game state [state] with the previous head/player moved to the end
-     of the queue in [state.players] *)
+  (** Takes in a game state [s]. Returns: The modified game state with the
+      previous player (head) moved to the end of the queue in [s.players]. *)
 
   val check_win : player -> bool
-  (**Returns whether given player has won the game, returns a bool *)
+  (** Determines whether given player [p] has won the game. Returns: [true] if
+      the hand of [p] is empty, [false] otherwise. *)
 
   val make : string list -> string list -> game_state
-  (**Returns an initial game state before the first move, created from a list of
-     player names*)
+  (** Returns an initial game state before the first move, created from a given
+      list of player names and list of CPU names. Distributes a random hand of
+      14 tiles to every player/CPU from the deck. *)
 
   val active_player : game_state -> player
-  (**Returns the current player in a game [state]*)
+  (** Returns the current player in a given game state [s]. *)
 end
 
 module Game : GameType
+(** A Rummikaml game. *)
