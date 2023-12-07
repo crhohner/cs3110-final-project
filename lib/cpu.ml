@@ -244,28 +244,31 @@ let rec color_vary l c =
     the tile can be legally placed, this function returns true. *)
 let color_seq (l : tile list) (t : tile) =
   let rec num_check n = function
-    | Joker::t -> num_check n t
-    | (Num n')::t when n=0 -> num_check (n'.num) t
-    | (Num n')::t -> if n'.num = n then num_check n t else false
+    | Joker :: t -> num_check n t
+    | Num n' :: t when n = 0 -> num_check n'.num t
+    | Num n' :: t -> if n'.num = n then num_check n t else false
     | [] -> true
   in
   color_vary (t :: l) [] && num_check 0 (t :: l)
 
-(** Returns iff the numbers of all the tiles in a tile list [l] are ordered
-  in ascending order. Helper function for place_pair and place_one. *)
-let num_seq l = 
-  let rec find_first = (function
-    | Joker::t -> find_first t
-    | (Num h)::t -> h.num, (Num h)::t
-    | [] -> failwith "empty list provided")
-  in let rec num_seq_aux n = function
+(** Returns iff the numbers of all the tiles in a tile list [l] are ordered in
+    ascending order. Helper function for place_pair and place_one. *)
+let num_seq l =
+  let rec find_first = function
+    | Joker :: t -> find_first t
+    | Num h :: t -> (h.num, Num h :: t)
+    | [] -> failwith "empty list provided"
+  in
+  let rec num_seq_aux n = function
     | [] -> true
-    | Joker::t -> num_seq_aux (n+1) t
-    | (Num h)::t -> h.num = n && num_seq_aux (n+1) t
-  in let n,l' = find_first l in num_seq_aux n l'
+    | Joker :: t -> num_seq_aux (n + 1) t
+    | Num h :: t -> h.num = n && num_seq_aux (n + 1) t
+  in
+  let n, l' = find_first l in
+  num_seq_aux n l'
 
-(** Returns iff the colors in a tile list [l] are uniform. Helper
-    function for place_one and place_two. *)
+(** Returns iff the colors in a tile list [l] are uniform. Helper function for
+    place_one and place_two. *)
 let color_same l =
   let rec color_same_aux l c =
     match (l, c) with
@@ -276,35 +279,28 @@ let color_same l =
     | h :: t, Some c -> (
         match h with
         | Joker -> color_same_aux t (Some c)
-        | Num n ->
-            if n.color = c then color_same_aux t (Some c) else false)
+        | Num n -> if n.color = c then color_same_aux t (Some c) else false)
     | [], None -> true (* should never happen *)
     | [], Some c -> true
-  in color_same_aux l None
+  in
+  color_same_aux l None
 
 let rec place_one b t =
   match b with
   | [] -> []
   | h :: tl ->
-      if
-        color_same (t::h) && num_seq (t::h) 
-      then (t::h) :: tl
-      else if
-        color_same (h @ [t]) && num_seq (h @ [t]) 
-      then (h @ [t]) :: tl
+      if color_same (t :: h) && num_seq (t :: h) then (t :: h) :: tl
+      else if color_same (h @ [ t ]) && num_seq (h @ [ t ]) then
+        (h @ [ t ]) :: tl
       else if List.length h = 3 && color_seq h t then (t :: h) :: tl
       else h :: place_one tl t
-    
+
 let rec place_pair b l =
   match b with
   | [] -> []
   | h :: t ->
-      if
-        color_same (l @ h) && num_seq (l @ h)
-      then (l @ h) :: t
-      else if
-        color_same (h @ l) && num_seq (h @ l)
-      then (h @ l) :: t
+      if color_same (l @ h) && num_seq (l @ h) then (l @ h) :: t
+      else if color_same (h @ l) && num_seq (h @ l) then (h @ l) :: t
       else h :: place_pair t l
 
 (**Returns a board with a pair of tiles from [l] added to it alongide that pair.
@@ -365,18 +361,28 @@ let rec turn game_state : game_state =
         let new_board, t = place_one_rec b hand in
         match t with
         | None ->
-            let rand_tile = d |> List.length |> Random.int in
-            let drawn, new_deck = remove rand_tile d in
-            let new_game_state =
-              {
-                players =
-                  List.tl game_state.players
-                  @ [ { p with hand = drawn :: p.hand } ];
-                board = new_board;
-                deck = new_deck;
-              }
-            in
-            new_game_state
+            if d <> [] then
+              let rand_tile = d |> List.length |> Random.int in
+              let drawn, new_deck = remove rand_tile d in
+              let new_game_state =
+                {
+                  players =
+                    List.tl game_state.players
+                    @ [ { p with hand = drawn :: p.hand } ];
+                  board = new_board;
+                  deck = new_deck;
+                }
+              in
+              new_game_state
+            else
+              let new_game_state =
+                {
+                  players = List.tl game_state.players @ [ p ];
+                  board = new_board;
+                  deck = d;
+                }
+              in
+              new_game_state
         | Some tile ->
             let new_hand = remove_tiles hand [ tile ] in
             let p' = { p with hand = new_hand } in

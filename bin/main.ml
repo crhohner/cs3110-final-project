@@ -31,8 +31,19 @@ let get_player_count () =
        (fun x ->
          match int_of_string x with
          | exception Failure s -> false
-         | n -> true)
+         | n when n > 0 && n < 7 -> true
+         | _ -> false)
        "enter a valid integer input 1-6")
+
+let get_cpu_count () =
+  int_of_string
+    (get_input
+       (fun x ->
+         match int_of_string x with
+         | exception Failure s -> false
+         | n when n < 6 -> true
+         | _ -> false)
+       "enter a valid integer input 0-5")
 
 let tokenize (s : string) =
   let rec aux (str : string) (acc : string list) (curr : string) : string list =
@@ -111,7 +122,7 @@ let make_players () =
   let user_player_count = get_player_count () in
   let _ = print_newline () in
   let _ = print_endline "how many cpu players?" in
-  let cpu_player_count = get_player_count () in
+  let cpu_player_count = get_cpu_count () in
   let user_player_names = get_user_player_names user_player_count in
   (user_player_names, get_cpu_player_names cpu_player_count)
 
@@ -120,7 +131,9 @@ let rec make_game () =
   if
     List.length users + List.length cpus < 2
     || List.length users + List.length cpus > 6
-  then make_game ()
+  then
+    let _ = print_endline "invalid player setup, try again!" in
+    make_game ()
   else Game.make users cpus
 
 (** Returns a valid location for the tile that a player wishes to select from

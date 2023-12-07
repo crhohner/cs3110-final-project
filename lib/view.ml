@@ -128,16 +128,16 @@ module CLIPrinter : ViewType = struct
   let show_help () =
     print_endline
       "help: \n\
-      \ \t - Rules: \n\
-      \ \t - For a valid row, there must be at least 3 tiles in that row \n\
-      \ \t - Each row can either have \n\
+      \ \t - rules: \n\
+      \ \t - for a valid row, there must be at least 3 tiles in that row \n\
+      \ \t - each row can either have \n\
       \ \t \t - the same colored tiles, increasing by 1 (there are 13 numbers)\n\
       \ \t \t - or the same number with all different colors (there are 4 \
        colors) \n\
-      \ \t - Jokers count as any tile (there are only 2 in the game) \n\
-      \ \t - Your goal is to get rid of all your tiles! \n\
-      \ \t - If you have no valid moves, draw a tile from the deck \n\
-      \ \t - Mechanics: \n\
+      \ \t - jokers count as any tile (there are only 2 in the game) \n\
+      \ \t - your goal is to get rid of all your tiles! \n\
+      \ \t - if you have no valid moves, draw a tile from the deck \n\
+      \ \t - mechanics: \n\
       \ \t - add to row (a): add a tile from your hand to the board \n\
       \ \t - move tile (m): move a tile on the board \n\
       \ \t - draw from deck (d): draw a tile, ends your turn \n\
