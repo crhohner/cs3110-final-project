@@ -241,71 +241,82 @@ let rec color_vary l c =
 (** Helper function for place_one that addresses the corner case in which a tile
     is potentially to be placed in a three-tile sequence of cards. If the
     sequence of tiles is a sequence of same-number, color-varied tiles in which
-    the tile can be legally placed, this function returns true. Assumes the
-    sequence of tile is legal such that either all tiles are of the same number
-    or they all vary. *)
+    the tile can be legally placed, this function returns true. *)
 let color_seq (l : tile list) (t : tile) =
-  let rec num_check l t =
-    match t with
-    | Joker -> true
-    | Num n -> (
-        match List.hd l with
-        | Joker -> num_check (List.tl l) t
-        | Num n1 -> n.num = n1.num)
+  let rec num_check n = function
+    | Joker::t -> num_check n t
+    | (Num n')::t when n=0 -> num_check (n'.num) t
+    | (Num n')::t -> if n'.num = n then num_check n t else false
+    | [] -> true
   in
-  color_vary (t :: l) [] && num_check l t
+  color_vary (t :: l) [] && num_check 0 (t :: l)
+
+(** Returns iff the numbers of all the tiles in a tile list [l] are ordered
+  in ascending order. Helper function for place_pair and place_one. *)
+let num_seq l = 
+  let rec find_first = (function
+    | Joker::t -> find_first t
+    | (Num h)::t -> h.num, (Num h)::t
+    | [] -> failwith "empty list provided")
+  in let rec num_seq_aux n = function
+    | [] -> true
+    | Joker::t -> num_seq_aux (n+1) t
+    | (Num h)::t -> h.num = n && num_seq_aux (n+1) t
+  in let n,l' = find_first l in num_seq_aux n l'
+
+(** Returns iff the colors in a tile list [l] are uniform. Helper
+    function for place_one and place_two. *)
+let color_same l =
+  let rec color_same_aux l c =
+    match (l, c) with
+    | h :: t, None -> (
+        match h with
+        | Joker -> color_same_aux t None
+        | Num n -> color_same_aux t (Some n.color))
+    | h :: t, Some c -> (
+        match h with
+        | Joker -> color_same_aux t (Some c)
+        | Num n ->
+            if n.color = c then color_same_aux t (Some c) else false)
+    | [], None -> true (* should never happen *)
+    | [], Some c -> true
+  in color_same_aux l None
 
 let rec place_one b t =
   match b with
   | [] -> []
   | h :: tl ->
-      let lst1 = t :: h in
-      let lst2 = h @ [ t ] in
-      let t1 = List.nth lst1 0 in
-      let t2 = List.nth lst1 1 in
-      let t3 = List.nth lst1 2 in
-      let col = snd (Model.get_color t1 t2 t3) in
-      let lst2_rev = List.rev lst2 in
-      let t1end = List.nth lst2_rev 0 in
-      let t2end = List.nth lst2_rev 1 in
-      let t3end = List.nth lst2_rev 2 in
-      if Model.valid_row col (snd (Model.get_num t1 t2 t3)) lst1 then lst1 :: tl
-      else if Model.valid_row col (snd (Model.get_num t1end t2end t3end)) lst2
-      then lst2 :: tl
+      (*let rev_h = List.rev h in*)
+      if
+        color_same (t::h) && num_seq (t::h) (*&&
+        check_threes [ t; List.hd h; List.nth h 1 ]
+        = Some [ t; List.hd h; List.nth h 1 ]*)
+      then (t::h) :: tl
+      else if
+        color_same (h @ [t]) && num_seq (h @ [t]) (*&&
+        check_threes [ List.nth rev_h 1; List.hd rev_h; t ]
+        = Some [ List.nth rev_h 1; List.hd rev_h; t ]*)
+      then (h @ [t]) :: tl
+      else if List.length h = 3 && color_seq h t then (t :: h) :: tl
       else h :: place_one tl t
-
-(*let rec place_pair b l = let tile1 = List.nth l 0 in let tile2 = List.nth l 1
-  in match b with | [] -> [] | h :: t -> if (color_vary h [] |> not) &&
-  check_threes [ tile1; tile2; List.hd h ] = Some [ tile1; tile2; List.hd h ]
-  then (l @ h) :: t else if (color_vary h [] |> not) && check_threes [ List.hd
-  (List.rev h); tile1; tile2 ] = Some [ List.hd (List.rev h); tile1; tile2 ]
-  then (h @ l) :: t else h :: place_pair t l*)
-
+    
 let rec place_pair b l =
-  let tile1 = List.nth l 0 in
-  let tile2 = List.nth l 1 in
+  (*let tile1 = List.nth l 0 in
+  let tile2 = List.nth l 1 in*)
   match b with
   | [] -> []
   | h :: t ->
-      let lst1 = tile1 :: tile2 :: h in
-      let lst2 = h @ [ tile1 ] @ [ tile2 ] in
-      let t1 = List.nth lst1 0 in
-      let t2 = List.nth lst1 1 in
-      let t3 = List.nth lst1 2 in
-      let col = snd (Model.get_color t1 t2 t3) in
-      let lst2_rev = List.rev lst2 in
-      let t1end = List.nth lst2_rev 0 in
-      let t2end = List.nth lst2_rev 1 in
-      let t3end = List.nth lst2_rev 2 in
-      if Model.valid_row col (snd (Model.get_num t1 t2 t3)) lst1 then lst1 :: t
-      else if Model.valid_row col (snd (Model.get_num t1end t2end t3end)) lst2
-      then lst2 :: t
+      if
+        color_same (l @ h) && num_seq (l @ h) (*&&
+        check_threes [ tile1; tile2; List.hd h ]
+        = Some [ tile1; tile2; List.hd h ]*)
+      then (l @ h) :: t
+      else if
+        color_same (h @ l) && num_seq (h @ l) (*&&
+        check_threes [ List.hd (List.rev h); tile1; tile2 ]
+        = Some [ List.hd (List.rev h); tile1; tile2 ]*)
+      then (h @ l) :: t
       else h :: place_pair t l
-
-(* if color_vary h [] |> not && check_threes [ tile1; tile2; List.hd h ] = Some
-   [ tile1; tile2; List.hd h ] then (l @ h) :: t else if color_vary h [] |> not
-   && check_threes [ List.hd (List.rev h); tile1; tile2 ] = Some [ List.hd
-   (List.rev h); tile1; tile2 ] then (h @ l) :: t else h :: place_pair t l*)
 
 (**Returns a board with a pair of tiles from [l] added to it alongide that pair.
    If no pair can be added, returns an unaltered board and ([]). Requires: [b]

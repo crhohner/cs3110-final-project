@@ -1218,6 +1218,13 @@ let cpu_tests =
          ];
        ]
      in
+     let board_8 =
+      [
+        [
+          Joker; Num { color = Black; num = 12 }; Num { color = Black; num = 13 };
+        ];
+      ]
+     in
      let pair_1 =
        [ Num { color = Yellow; num = 5 }; Num { color = Yellow; num = 6 } ]
      in
@@ -1233,6 +1240,9 @@ let cpu_tests =
      in
      let pair_6 =
        [ Num { color = Yellow; num = 6 }; Num { color = Yellow; num = 7 } ]
+     in
+     let pair_7 =
+       [ Num { color = Yellow; num = 1 }; Num { color = Yellow; num = 2 } ]
      in
      let debug_1 =
        [
@@ -1272,7 +1282,8 @@ let cpu_tests =
          place_pair_test board_4 board_1 pair_4 );
        ("Joker check" >:: fun _ -> debug_test (Some debug_2) debug_2);
        ("R≠1 append to end" >:: fun _ -> place_pair_test board_6 board_5 pair_1);
-       ("Hi Caroline" >:: fun _ -> place_pair_test board_7 board_7 pair_6);
+       ("Fix 1" >:: fun _ -> place_pair_test board_7 board_7 pair_6);
+       ("Fix 2" >:: fun _ -> place_pair_test board_8 board_8 pair_7);
      ]);
     (let place_one_test out in1 in2 =
        let actual = Cpu.place_one in1 in2 in
@@ -1457,7 +1468,7 @@ let cpu_tests =
        ("Joker" >:: fun _ -> place_one_test board_j board_1 Joker);
        ("No placement t1" >:: fun _ -> place_one_test board_1 board_1 tile_5);
        ("No placement t2" >:: fun _ -> place_one_test board_1 board_1 tile_6);
-       ("Yo Caroline" >:: fun _ -> place_one_test board_6 board_6 tile_7);
+       ("Fix 1" >:: fun _ -> place_one_test board_6 board_6 tile_7);
      ]);
   ]
 
