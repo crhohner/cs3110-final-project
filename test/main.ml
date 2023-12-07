@@ -1426,6 +1426,16 @@ let cpu_tests =
          ];
        ]
      in
+     let board_7 =
+       [
+         [
+           Num { color = Blue; num = 6 };
+           Num { color = Blue; num = 7 };
+           Num { color = Blue; num = 8 };
+           Joker;
+         ]
+       ]
+     in
      let board_j =
        [
          [
@@ -1458,6 +1468,7 @@ let cpu_tests =
      let tile_5 = Num { color = Black; num = 13 } in
      let tile_6 = Num { color = Red; num = 3 } in
      let tile_7 = Num { color = Yellow; num = 7 } in
+     let tile_8 = Num { color = Yellow; num = 10 } in
      [
        (*Note: t1/type1 refers to when an ascending numerical sequence is added
          to, t2/type2 refers to when a uniform numerical sequence is added to*)
@@ -1469,6 +1480,7 @@ let cpu_tests =
        ("No placement t1" >:: fun _ -> place_one_test board_1 board_1 tile_5);
        ("No placement t2" >:: fun _ -> place_one_test board_1 board_1 tile_6);
        ("Fix 1" >:: fun _ -> place_one_test board_6 board_6 tile_7);
+       ("Fix 2" >:: fun _ -> place_one_test board_7 board_7 tile_8);
      ]);
   ]
 

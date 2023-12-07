@@ -286,35 +286,24 @@ let rec place_one b t =
   match b with
   | [] -> []
   | h :: tl ->
-      (*let rev_h = List.rev h in*)
       if
-        color_same (t::h) && num_seq (t::h) (*&&
-        check_threes [ t; List.hd h; List.nth h 1 ]
-        = Some [ t; List.hd h; List.nth h 1 ]*)
+        color_same (t::h) && num_seq (t::h) 
       then (t::h) :: tl
       else if
-        color_same (h @ [t]) && num_seq (h @ [t]) (*&&
-        check_threes [ List.nth rev_h 1; List.hd rev_h; t ]
-        = Some [ List.nth rev_h 1; List.hd rev_h; t ]*)
+        color_same (h @ [t]) && num_seq (h @ [t]) 
       then (h @ [t]) :: tl
       else if List.length h = 3 && color_seq h t then (t :: h) :: tl
       else h :: place_one tl t
     
 let rec place_pair b l =
-  (*let tile1 = List.nth l 0 in
-  let tile2 = List.nth l 1 in*)
   match b with
   | [] -> []
   | h :: t ->
       if
-        color_same (l @ h) && num_seq (l @ h) (*&&
-        check_threes [ tile1; tile2; List.hd h ]
-        = Some [ tile1; tile2; List.hd h ]*)
+        color_same (l @ h) && num_seq (l @ h)
       then (l @ h) :: t
       else if
-        color_same (h @ l) && num_seq (h @ l) (*&&
-        check_threes [ List.hd (List.rev h); tile1; tile2 ]
-        = Some [ List.hd (List.rev h); tile1; tile2 ]*)
+        color_same (h @ l) && num_seq (h @ l)
       then (h @ l) :: t
       else h :: place_pair t l
 
