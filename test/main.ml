@@ -4,6 +4,25 @@ open Model
 open View
 open Cpu
 
+(*Testing Plan: Our unit testing mostly involved checking functionality on
+  different decks. As such, the majority of this file is dedicated to defining
+  the contents of simulated hands and decks. These collections of tiles were
+  used in blackbox testing. If and when we found bugs with our blackbox testing,
+  we addressed the issue and designed additional glass box tests in order to get
+  at the specific issue. All of the functionality related to checking whether a
+  given board or combination of tiles was viable, manipulation of the board, and
+  setting up the initial game state was tested with OUnit. The two turn methods
+  which play out the turn of a user player and a CPU respectively, along with
+  helper methods for safely collecting user input on the CLI, were tested
+  manually. We tested each of our three modules: Model, which handles the state
+  of the game and the board; CPU, which makes decisions for our CPU; and View,
+  which pretty-prints an ASCII representation of our game for the CLI. This
+  approach fully demonstrates the correctness of our system as every key
+  function involving deterministic outputs (i.e. whether a given board is valid)
+  has been thoroughly tested in this file, and all paths for correct and
+  incorrect (non-deterministic) user input have been tested manually through
+  playtesting.*)
+
 let joker = Joker
 let t1 = Num { color = Yellow; num = 2 }
 let t2 = Num { color = Black; num = 13 }
@@ -1219,11 +1238,13 @@ let cpu_tests =
        ]
      in
      let board_8 =
-      [
-        [
-          Joker; Num { color = Black; num = 12 }; Num { color = Black; num = 13 };
-        ];
-      ]
+       [
+         [
+           Joker;
+           Num { color = Black; num = 12 };
+           Num { color = Black; num = 13 };
+         ];
+       ]
      in
      let pair_1 =
        [ Num { color = Yellow; num = 5 }; Num { color = Yellow; num = 6 } ]
@@ -1433,7 +1454,7 @@ let cpu_tests =
            Num { color = Blue; num = 7 };
            Num { color = Blue; num = 8 };
            Joker;
-         ]
+         ];
        ]
      in
      let board_j =
